@@ -2,6 +2,7 @@ package com.github.videohandler4j.imp;
 
 import java.io.File;
 
+import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileHandler;
 import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.StopWatch;
@@ -37,7 +38,7 @@ public class JoinVideoHandler extends AbstractFileHandler<IVideoInfoEvent> {
   }
 
   @Override
-  protected void handle(File file, Emitter<IVideoInfoEvent> emitter) throws Exception {
+  protected void handle(IInputFile file, Emitter<IVideoInfoEvent> emitter) throws Exception {
     StopWatch handleWatch = new StopWatch();
     totalTime += 1; 
     //WE HAVE TO GO BACK HERE

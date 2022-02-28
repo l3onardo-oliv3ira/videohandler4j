@@ -2,6 +2,7 @@ package com.github.videohandler4j.imp.event;
 
 import com.github.filehandler4j.imp.event.FileInfoEvent;
 import com.github.videohandler4j.IVideoSliceEvent;
+import com.github.videohandler4j.imp.TimeTools;
 
 public class VideoSliceEvent extends FileInfoEvent implements IVideoSliceEvent {
 
@@ -16,7 +17,7 @@ public class VideoSliceEvent extends FileInfoEvent implements IVideoSliceEvent {
   
   @Override
   public final long getStartTime() {
-    return totalTime;
+    return startTime;
   }
 
   @Override
@@ -27,6 +28,16 @@ public class VideoSliceEvent extends FileInfoEvent implements IVideoSliceEvent {
   @Override
   public final String toString() {
     return getMessage() + " startTime: " + startTime + " of " + totalTime;
+  }
+
+  @Override
+  public final String getStartTimeString() {
+    return TimeTools.toHmsString(startTime);
+  }
+
+  @Override
+  public final String getTotalTimeString() {
+    return TimeTools.toHmsString(totalTime);
   }
 
 }

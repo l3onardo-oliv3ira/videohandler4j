@@ -1,25 +1,44 @@
 package com.github.videohandler4j.imp;
 
-import java.io.File;
+import static com.github.videohandler4j.imp.VideoTool.FFMPEG;
+import static java.lang.Math.max;
+import static java.lang.Runtime.getRuntime;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import com.github.filehandler4j.IInputFile;
+import com.github.filehandler4j.IIterator;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
-import com.github.utils4j.imp.NotImplementedException;
+import com.github.filehandler4j.imp.ArrayIterator;
+import com.github.utils4j.IConstants;
+import com.github.utils4j.imp.States;
+import com.github.utils4j.imp.Threads;
+import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoInfoEvent;
+import com.github.videohandler4j.IVideoSlice;
 import com.github.videohandler4j.imp.event.VideoInfoEvent;
+import com.github.videohandler4j.imp.event.VideoOutputEvent;
+import com.github.videohandler4j.imp.exception.FFMpegNotFoundException;
 
 import io.reactivex.Emitter;
 
-abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoEvent> {
+abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoEvent, IVideoSlice> {
 
-  protected long timeNumber = 0;
   private File currentOutput = null;
 
   public AbstractVideoSplitter() {
     this(new VideoSlice());
   }
   
-  public AbstractVideoSplitter(VideoSlice... ranges) {
-    super(ranges);
+  public AbstractVideoSplitter(IVideoSlice... ranges) {
+    this(new ArrayIterator<IVideoSlice>(ranges));
+  }
+  
+  public AbstractVideoSplitter(IIterator<IVideoSlice> iterator) {
+    super(iterator);
     this.reset();
   }
   
@@ -38,14 +57,82 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
 
   @Override
   public void reset() {
-    timeNumber = 0;
     currentOutput = null;
     super.reset();
   }  
   
   @Override
-  protected void handle(File file, Emitter<IVideoInfoEvent> emitter) throws Exception {
-    emitter.onNext(new VideoInfoEvent("Processando arquivo " + file.getName()));
-    throw new NotImplementedException();  //WE HAVE TO GO BACK HERE!
+  protected void handle(IInputFile f, Emitter<IVideoInfoEvent> emitter) throws Exception {
+    States.requireTrue(f instanceof IVideoFile, "file is not instance of VideoFile, please use VideoDescriptor");
+    IVideoFile file = (IVideoFile)f;
+    IVideoSlice next = next();
+    
+    if (next != null) {
+      File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
+      
+      do {
+        currentOutput = resolve(next.outputFileName(file));
+        currentOutput.delete();
+        
+        final Process process = new ProcessBuilder(
+          ffmpegHome.getCanonicalPath(),
+          "-y",
+          "-i",
+          file.getAbsolutePath(),
+          "-threads",
+          Long.toString(max(getRuntime().availableProcessors() - 1, 1)),
+          "-hide_banner",
+          "-ss",
+          TimeTools.toString(next.start()),
+          "-to",
+          TimeTools.toString(next.end(file)),
+          "-c",
+          "copy",
+          currentOutput.getAbsolutePath()
+        ).redirectErrorStream(true).start();
+        
+        emitter.onNext(new VideoInfoEvent("Processando arquivo " + file.getName() + " saida: " + currentOutput.getAbsolutePath()));
+        
+        try(InputStream input = process.getInputStream()) {
+          Thread reader = Threads.startAsync("ffmpeg output reader", () -> {
+            Thread currentThread = Thread.currentThread();
+            try {
+              BufferedReader br = new BufferedReader(new InputStreamReader(input, IConstants.CP_850));
+              String inputLine;
+              while (!currentThread.isInterrupted() && (inputLine = br.readLine()) != null) {
+                emitter.onNext(new VideoInfoEvent(inputLine));
+              }
+            } catch (Exception e) {
+              emitter.onError(e);
+            }
+          });
+          try {
+            if (process.waitFor() == 0) {
+              if (!accept(currentOutput, next)) {
+                currentOutput.delete();
+              } else {
+                emitter.onNext(new VideoOutputEvent("Gerado arquivo", currentOutput, next.getTime(file)));
+              }
+            }
+            reader.interrupt();
+            reader.join(2000);
+          }catch(InterruptedException e) {
+            reader.interrupt();
+            reader.join(2000);
+            Thread.currentThread().interrupt();
+            throw e;
+          }finally {
+            reader = null;
+          }
+        }finally {
+          process.destroyForcibly();
+        }
+        next = next();
+      }while(next != null);
+    }      
+  }
+
+  protected boolean accept(File outputFile, IVideoSlice slice) {
+    return true;
   }  
 }
