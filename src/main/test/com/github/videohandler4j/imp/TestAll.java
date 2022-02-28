@@ -39,10 +39,10 @@ public class TestAll {
         );
         break;
       case 1:
-        handler = new ByDurationVideoSplitter(file, Duration.ofMinutes(5));
+        handler = new ByDurationVideoSplitter(file, Duration.ofMinutes(10));
         break;
       case 2:
-        handler = new BySizeVideoSplitter(file, 5 * 1024 * 1024);
+        handler = new BySizeVideoSplitter(file, 20 * 1024 * 1024);
         break;
       }
       if (handler != null) {

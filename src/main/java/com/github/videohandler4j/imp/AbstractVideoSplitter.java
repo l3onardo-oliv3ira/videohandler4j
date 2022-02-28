@@ -8,12 +8,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.IIterator;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
 import com.github.filehandler4j.imp.ArrayIterator;
 import com.github.utils4j.IConstants;
+import com.github.utils4j.imp.Containers;
 import com.github.utils4j.imp.States;
 import com.github.utils4j.imp.Threads;
 import com.github.videohandler4j.IVideoFile;
@@ -28,13 +30,19 @@ import io.reactivex.Emitter;
 abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoEvent, IVideoSlice> {
 
   private File currentOutput = null;
+  private int bitRate = -1;
 
   public AbstractVideoSplitter() {
     this(new VideoSlice());
   }
   
   public AbstractVideoSplitter(IVideoSlice... ranges) {
+    this(-1, ranges);
+  }
+  
+  public AbstractVideoSplitter(int bitRate, IVideoSlice... ranges) {
     this(new ArrayIterator<IVideoSlice>(ranges));
+    this.bitRate = bitRate;
   }
   
   public AbstractVideoSplitter(IIterator<IVideoSlice> iterator) {
@@ -74,7 +82,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         currentOutput = resolve(next.outputFileName(file));
         currentOutput.delete();
         
-        final Process process = new ProcessBuilder(
+        List<String> commandLine = Containers.arrayList(
           ffmpegHome.getCanonicalPath(),
           "-y",
           "-i",
@@ -86,10 +94,21 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           TimeTools.toString(next.start()),
           "-to",
           TimeTools.toString(next.end(file)),
-          "-c",
-          "copy",
-          currentOutput.getAbsolutePath()
-        ).redirectErrorStream(true).start();
+          "-max_muxing_queue_size",
+          "89478485"
+        );
+        
+        if (bitRate > 0) {
+          commandLine.add("-b:v");
+          commandLine.add(bitRate + "k");
+        }else {
+          commandLine.add("-c");
+          commandLine.add("copy");
+        }
+        commandLine.add(currentOutput.getAbsolutePath());
+
+        System.out.println(commandLine);
+        final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
         
         emitter.onNext(new VideoInfoEvent("Processando arquivo " + file.getName() + " saida: " + currentOutput.getAbsolutePath()));
         
