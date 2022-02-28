@@ -24,9 +24,9 @@ public class BySizeVideoSplitter extends AbstractVideoSplitter{
     if (outputFile.length() <= maxSize) {
       return true;
     }
-    long newSize = (long)(percent * maxSize);
+    long smallerSize = (long)(percent * maxSize);
     percent -= 0.05;
-    setIterator(new ArrayIterator<IVideoSlice>(slice(file, newSize, slice.start())));
+    setIterator(new ArrayIterator<IVideoSlice>(slice(file, smallerSize, slice.start())));
     return false;
   } 
 }

@@ -107,7 +107,6 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         }
         commandLine.add(currentOutput.getAbsolutePath());
 
-        System.out.println(commandLine);
         final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
         
         emitter.onNext(new VideoInfoEvent("Processando arquivo " + file.getName() + " saida: " + currentOutput.getAbsolutePath()));
@@ -126,12 +125,11 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
             }
           });
           try {
-            if (process.waitFor() == 0) {
-              if (!accept(currentOutput, next)) {
-                currentOutput.delete();
-              } else {
-                emitter.onNext(new VideoOutputEvent("Gerado arquivo", currentOutput, next.getTime(file)));
-              }
+            boolean success = process.waitFor() == 0 && accept(currentOutput, next);
+            if (!success) {
+              currentOutput.delete();
+            } else {
+              emitter.onNext(new VideoOutputEvent("Gerado arquivo", currentOutput, next.getTime(file)));
             }
             reader.interrupt();
             reader.join(2000);
