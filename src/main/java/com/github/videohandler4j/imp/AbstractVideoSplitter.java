@@ -77,6 +77,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     
     if (next != null) {
       File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
+
       
       do {
         currentOutput = resolve(next.outputFileName(file));
@@ -111,6 +112,8 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         
         emitter.onNext(new VideoInfoEvent("Processando arquivo " + file.getName() + " saida: " + currentOutput.getAbsolutePath()));
         
+        boolean success = false;
+
         try(InputStream input = process.getInputStream()) {
           Thread reader = Threads.startAsync("ffmpeg output reader", () -> {
             Thread currentThread = Thread.currentThread();
@@ -125,12 +128,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
             }
           });
           try {
-            boolean success = process.waitFor() == 0 && accept(currentOutput, next);
-            if (!success) {
-              currentOutput.delete();
-            } else {
-              emitter.onNext(new VideoOutputEvent("Gerado arquivo", currentOutput, next.getTime(file)));
-            }
+            success = process.waitFor() == 0 && accept(currentOutput, next);
             reader.interrupt();
             reader.join(2000);
           }catch(InterruptedException e) {
@@ -143,6 +141,11 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           }
         }finally {
           process.destroyForcibly();
+          if (!success) {
+            currentOutput.delete();
+          } else {
+            emitter.onNext(new VideoOutputEvent("Gerado arquivo", currentOutput, next.getTime(file)));
+          }
         }
         next = next();
       }while(next != null);
