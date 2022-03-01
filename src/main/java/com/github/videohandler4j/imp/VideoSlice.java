@@ -2,11 +2,11 @@ package com.github.videohandler4j.imp;
 
 import static com.github.videohandler4j.imp.TimeTools.toHmsString;
 
-import com.github.filehandler4j.imp.FileRange;
+import com.github.filehandler4j.imp.FileSlice;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoSlice;
 
-public final class VideoSlice extends FileRange implements IVideoSlice {
+public final class VideoSlice extends FileSlice implements IVideoSlice {
 
   public VideoSlice() {
     this(0, Long.MAX_VALUE);
@@ -33,7 +33,7 @@ public final class VideoSlice extends FileRange implements IVideoSlice {
 
   @Override
   public long end(IVideoFile file) {
-    return Math.min(super.end(), file.getDuration());
+    return Math.min(super.end(), file.getDuration().toMillis());
   }
 
   @Override

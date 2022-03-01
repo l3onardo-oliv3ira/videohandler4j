@@ -1,8 +1,8 @@
 package com.github.videohandler4j;
 
-import com.github.filehandler4j.IFileRange;
+import com.github.filehandler4j.IFileSlice;
 
-public interface IVideoSlice extends IFileRange {
+public interface IVideoSlice extends IFileSlice {
   long getTime();
 
   long getTime(IVideoFile file);

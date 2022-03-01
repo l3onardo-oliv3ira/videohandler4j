@@ -3,12 +3,14 @@ package com.github.videohandler4j.imp;
 import static com.github.utils4j.imp.Strings.padStart;
 import static com.github.utils4j.imp.Strings.toInt;
 import static java.time.Duration.ofHours;
+import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.Strings;
@@ -35,85 +37,83 @@ public class TimeTools {
     long div = timeMillis / ONE_HOUR.toMillis();
     long mod = timeMillis % ONE_HOUR.toMillis();
     if (mod == 0) {
-      return padStart(div, 2) + hseparator + "00" + mseparator + "00";
+      return toString(div) + hseparator + "00" + mseparator + "00";
     }
     long hours = div;
     timeMillis -= hours * ONE_HOUR.toMillis();
     div = timeMillis / ONE_MINUTE.toMillis();
     mod = timeMillis % ONE_MINUTE.toMillis();
     if (mod == 0) {
-      return padStart(hours, 2) + hseparator + padStart(div, 2) + mseparator + "00";
+      return toString(hours) + hseparator + padStart(div, 2) + mseparator + "00";
     }
     long minutes = div;
     timeMillis -= minutes * ONE_MINUTE.toMillis();
     div = timeMillis / ONE_SECOND.toMillis();
-    return padStart(hours, 2) + hseparator + padStart(minutes, 2) + mseparator + padStart(div, 2);
+    return toString(hours) + hseparator + padStart(minutes, 2) + mseparator + padStart(div, 2);
   }
   
-  public static long toMillis(String time) {
-    if (!Strings.hasText(time))
-      return -1;
-    final int length = time.length();
+  public static Optional<Duration> parse(String duration) {
+    if (!Strings.hasText(duration))
+      return Optional.empty();
+    final int length = duration.length();
     int start = 0;
-    int next = time.indexOf(':');
+    int next = duration.indexOf(':');
     if (next <= 0)
-      return -1;
-    int hour = toInt(time.substring(start, next), -1);
+      return Optional.empty();
+    int hour = toInt(duration.substring(start, next), -1);
     if (hour < 0)
-      return -1;
+      return Optional.empty();
     Duration h = ofHours(hour);
     start = next + 1;
     if (start >= length)
-      return -1;
-    next = time.indexOf(':', start);
+      return Optional.empty();
+    next = duration.indexOf(':', start);
     if (next < 0)
-      return -1;
-    int minutes = toInt(time.substring(start, next), -1);
+      return Optional.empty();
+    int minutes = toInt(duration.substring(start, next), -1);
     if (minutes < 0)
-      return -1;
+      return Optional.empty();
     Duration m = ofMinutes(minutes);
     start = next + 1;
     if (start >= length)
-      return -1;
-    int sec = toInt(time.substring(start), -1);
+      return Optional.empty();
+    int sec = toInt(duration.substring(start), -1);
     if (sec < 0)
-      return -1;
+      return Optional.empty();
     Duration s = ofSeconds(sec);
-    return h.toMillis() + m.toMillis() + s.toMillis();
+    return Optional.of(ofMillis(h.toMillis() + m.toMillis() + s.toMillis()));
   }
 
-  public static IVideoSlice[] slice(IVideoFile file, Duration maxDuration) {
-    return slice(file, maxDuration, 0);
+  public static IVideoSlice[] slices(IVideoFile file, Duration maxSliceDuration) {
+    return slices(file, maxSliceDuration, 0);
   }
   
-  public static IVideoSlice[] slice(IVideoFile file, Duration maxDuration, long begin) {
-    Args.requireNonNull(maxDuration, "maxDuration is null");
+  public static IVideoSlice[] slices(IVideoFile file, long maxSliceFileSize) {
+    return slices(file, maxSliceFileSize, 0);
+  }
+  
+  public static IVideoSlice[] slices(IVideoFile file, long maxSize, long sliceStart) {
     Args.requireNonNull(file, "file is null");
+    Args.requireZeroPositive(maxSize, "maxSize < 0");
+    Args.requireZeroPositive(sliceStart, "sliceStart < 0");
+    long fileDurationMillis = file.getDuration().toMillis();
+    long fileSize = file.length();
+    long sizePerDuration = fileSize / fileDurationMillis;
+    long sliceDurationMillis = maxSize / sizePerDuration;
+    return slices(file, Duration.ofMillis(sliceDurationMillis), sliceStart);
+  }
+  
+  public static IVideoSlice[] slices(IVideoFile file, Duration durationSlice, long sliceStart) {
+    Args.requireNonNull(file, "file is null");
+    Args.requireNonNull(durationSlice, "durationSlice is null");
+    Args.requireZeroPositive(sliceStart, "sliceStart < 0");
     List<IVideoSlice> slices = new ArrayList<>();
-    long durationVideo = file.getDuration();
-    long durationSlice = maxDuration.toMillis();
-    long lastTime = begin;
-    for(long start = begin; start < durationVideo; start += durationSlice) {
-      slices.add(new VideoSlice(start, lastTime = start + durationSlice));
-    }
-    if (lastTime < durationVideo) {
-      slices.add(new VideoSlice(lastTime, durationVideo));
+    long durationVideoMillis = file.getDuration().toMillis();
+    long durationSliceMillis = durationSlice.toMillis();
+    for(long start = sliceStart; start < durationVideoMillis; start += durationSliceMillis) {
+      slices.add(new VideoSlice(start, Math.max(durationVideoMillis, start + durationSliceMillis)));
     }
     return slices.toArray(new IVideoSlice[slices.size()]);
-  }
-
-  public static IVideoSlice[] slice(IVideoFile file, long maxSize) {
-    return slice(file, maxSize, 0);
-  }
-  
-  public static IVideoSlice[] slice(IVideoFile file, long maxSize, long begin) {
-    Args.requireNonNull(maxSize, "maxDuration is null");
-    Args.requireNonNull(file, "file is null");
-    long duration = file.getDuration();
-    long size = file.length();
-    long sizePerTime = size / duration;
-    long sliceDuration = maxSize / sizePerTime;
-    return slice(file, Duration.ofMillis(sliceDuration), begin);
   }
 }
 

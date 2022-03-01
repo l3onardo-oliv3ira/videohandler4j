@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 import com.github.filehandler4j.IFileHandler;
 import com.github.videohandler4j.IVideoFile;
@@ -29,20 +30,25 @@ public class TestAll {
       IFileHandler<?> handler = null;
       switch(i) {
       case 0:
-        Duration _2minutes = Duration.ofMinutes(2);
-        int step = 0;
+        final Duration _2minutes = Duration.ofMinutes(2);
+        final Duration _3minutes = Duration.ofMinutes(3);
+        final Duration _4minutes = Duration.ofMinutes(4);
+        
+        long sliceStartMillis = 0;
         handler = new BySliceVideoSplitter(
-          new VideoSlice(step, step += _2minutes.toMillis()),
-          new VideoSlice(step, step += _2minutes.toMillis()),
-          new VideoSlice(step, step += _2minutes.toMillis()),
-          new VideoSlice(step, file.getDuration())
+          new VideoSlice(sliceStartMillis, sliceStartMillis += _2minutes.toMillis()),
+          new VideoSlice(sliceStartMillis, sliceStartMillis += _3minutes.toMillis()),
+          new VideoSlice(sliceStartMillis, sliceStartMillis += _4minutes.toMillis()),
+          new VideoSlice(sliceStartMillis, file.getDuration(ChronoUnit.MILLIS))
         );
         break;
       case 1:
-        handler = new ByDurationVideoSplitter(file, Duration.ofMinutes(10));
+        final Duration maxSliceDuration = Duration.ofMinutes(10); //00:10:00
+        handler = new ByDurationVideoSplitter(file, maxSliceDuration);
         break;
       case 2:
-        handler = new BySizeVideoSplitter(file, 20 * 1024 * 1024);
+        final long maxSliceSize = 20 * 1024 * 1024; //20MB
+        handler = new BySizeVideoSplitter(file, maxSliceSize);
         break;
       }
       if (handler != null) {

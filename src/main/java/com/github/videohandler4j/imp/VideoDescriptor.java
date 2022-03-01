@@ -8,7 +8,7 @@ import com.github.videohandler4j.IVideoFile;
 
 public class VideoDescriptor extends InputDescriptor {
   
-  public VideoDescriptor() {
+  private VideoDescriptor() {
   }
 
   public static class Builder extends InputDescriptor.Builder{

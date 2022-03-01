@@ -71,7 +71,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
   
   @Override
   protected void handle(IInputFile f, Emitter<IVideoInfoEvent> emitter) throws Exception {
-    States.requireTrue(f instanceof IVideoFile, "file is not instance of VideoFile, please use VideoDescriptor");
+    States.requireTrue(f instanceof IVideoFile, "file is not instance of VideoFile, please use VideoDescriptor instead");
     IVideoFile file = (IVideoFile)f;
     IVideoSlice next = next();
     

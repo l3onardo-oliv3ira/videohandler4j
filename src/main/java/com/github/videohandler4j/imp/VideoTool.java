@@ -1,13 +1,13 @@
 package com.github.videohandler4j.imp;
 
+import static com.github.videohandler4j.imp.TimeTools.parse;
+
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.temporal.TemporalUnit;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 import com.github.filehandler4j.imp.FileWrapper;
 import com.github.utils4j.IConstants;
@@ -15,9 +15,9 @@ import com.github.utils4j.imp.Environment;
 import com.github.utils4j.imp.Streams;
 import com.github.utils4j.imp.Strings;
 import com.github.utils4j.imp.function.Caller;
-import com.github.videohandler4j.imp.exception.VideoDurationNotFound;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.imp.exception.FFMpegNotFoundException;
+import com.github.videohandler4j.imp.exception.VideoDurationNotFound;
 
 public enum VideoTool implements Caller<File, IVideoFile, VideoDurationNotFound> {
   FFMPEG("ffmpeg.exe");
@@ -48,33 +48,21 @@ public enum VideoTool implements Caller<File, IVideoFile, VideoDurationNotFound>
         output = Streams.readOutStream(input, IConstants.CP_850).get();
       }
       process.waitFor();
+      
       final String durationPrefix = "Duration: ";
       int idx = output.indexOf(durationPrefix);
       if (idx < 0)
         throw new VideoDurationNotFound();
-      int start = idx + durationPrefix.length();
-      idx = output.indexOf(':', start);
-      if (idx < 0)
-        throw new VideoDurationNotFound();
-      int hour = Strings.toInt(output.substring(start, idx), -1);
-      if (hour < 0)
-        throw new VideoDurationNotFound();
-      start = idx + 1;
-      idx = output.indexOf(':', start);
-      if (idx < 0)
-        throw new VideoDurationNotFound();
-      int minutes = Strings.toInt(output.substring(start, idx), -1);
-      if (hour < 0)
-        throw new VideoDurationNotFound();
-      start = idx + 1;
-      idx = start;
-      while(Character.isDigit(output.charAt(idx)))
+      
+      final int length = output.length();
+      final int start = idx += durationPrefix.length();
+      char chr;
+      while(idx < length && (Character.isDigit(chr = output.charAt(idx)) || chr == ':'))
         idx++;
-      int seconds = Strings.toInt(output.substring(start, idx), -1);
-      if (seconds < 0)
-        throw new VideoDurationNotFound();
-      long durationTime = hour * 3600 + minutes * 60000  + seconds * 1000;
-      return new VideoFile(file, durationTime);
+
+      String durationText = output.substring(start, idx);
+      Duration duration = parse(durationText).orElseThrow(VideoDurationNotFound::new);
+      return new VideoFile(file, duration);
     } catch (VideoDurationNotFound e) {
       throw e;
     } catch (Exception e) {
@@ -84,16 +72,21 @@ public enum VideoTool implements Caller<File, IVideoFile, VideoDurationNotFound>
   
   private static class VideoFile extends FileWrapper implements IVideoFile {
 
-    private long durationTime;
+    private final Duration duration;
     
-    private VideoFile(File file, long durationTime) {
+    private VideoFile(File file, Duration duration) {
       super(file);
-      this.durationTime = durationTime;
+      this.duration = duration;
     }
     
     @Override
-    public long getDuration() {
-      return durationTime;
+    public Duration getDuration() {
+      return duration;
+    }
+
+    @Override
+    public long getDuration(TemporalUnit unit) {
+      return duration.get(unit);
     }
   }
 }
