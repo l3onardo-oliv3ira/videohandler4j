@@ -38,6 +38,18 @@
       <version>2.2.20</version>
 	</dependency>
 	
+	<dependency>
+		<groupId>com.miglayout</groupId>
+		<artifactId>miglayout-swing</artifactId>
+		<version>5.2</version>
+	</dependency>
+	
+	<dependency>
+	    <groupId>com.google.guava</groupId>
+	    <artifactId>guava</artifactId>
+	    <version>31.0.1-jre</version>
+	</dependency>
+	
   </dependencies>
 
   <build>

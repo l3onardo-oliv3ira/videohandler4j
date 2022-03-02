@@ -78,7 +78,6 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     if (next != null) {
       File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
 
-      
       do {
         currentOutput = resolve(next.outputFileName(file));
         currentOutput.delete();
