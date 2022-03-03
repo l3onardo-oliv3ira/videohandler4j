@@ -6,11 +6,11 @@ import java.util.function.Consumer;
 import javax.swing.JPanel;
 
 import com.github.videohandler4j.IVideoSliceView;
-import com.github.videohandler4j.gui.imp.VideoSlacePanel;
+import com.github.videohandler4j.gui.imp.VideoSlicePanel;
 
 public class VideoSliceView extends VideoSliceWrapper implements IVideoSliceView {
 
-  private final VideoSlacePanel panel;
+  private final VideoSlicePanel panel;
   
   public VideoSliceView() {
     this(0);
@@ -22,7 +22,7 @@ public class VideoSliceView extends VideoSliceWrapper implements IVideoSliceView
   
   public VideoSliceView(long startTime, long endTime) {
     super(new DefaultVideoSlice(startTime, endTime));
-    this.panel = new VideoSlacePanel(slice());
+    this.panel = new VideoSlicePanel(slice());
   }
 
   @Override

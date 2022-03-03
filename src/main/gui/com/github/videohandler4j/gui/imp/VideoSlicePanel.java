@@ -25,7 +25,6 @@ import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
 import com.github.utils4j.gui.imp.AbstractPanel;
-import com.github.utils4j.gui.imp.FixedLengthDocument;
 import com.github.utils4j.imp.Args;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoSlice;
@@ -34,7 +33,7 @@ import com.github.videohandler4j.imp.VideoDescriptor;
 
 import net.miginfocom.swing.MigLayout;
 
-public class VideoSlacePanel extends AbstractPanel  { 
+public class VideoSlicePanel extends AbstractPanel  { 
   
   private static final Consumer<JPanel> NOTHING = (slice) -> {};
   
@@ -78,15 +77,15 @@ public class VideoSlacePanel extends AbstractPanel  {
   
   private IVideoSlice slice;
 
-  public VideoSlacePanel(IVideoSlice slice) {
+  public VideoSlicePanel(IVideoSlice slice) {
     super("/vh4j/icons/buttons/");
     
     playPauseButton.setIcon(playIcon);
     playPauseButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        onDoSelect.accept(VideoSlacePanel.this);
-        onPlay.accept(VideoSlacePanel.this);
+        onDoSelect.accept(VideoSlicePanel.this);
+        onPlay.accept(VideoSlicePanel.this);
       }
     });
     
@@ -94,8 +93,8 @@ public class VideoSlacePanel extends AbstractPanel  {
     stopButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        onDoSelect.accept(VideoSlacePanel.this);
-        onStoped.accept(VideoSlacePanel.this);
+        onDoSelect.accept(VideoSlicePanel.this);
+        onStoped.accept(VideoSlicePanel.this);
       }
     });
     
@@ -103,8 +102,8 @@ public class VideoSlacePanel extends AbstractPanel  {
     saveButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        onDoSelect.accept(VideoSlacePanel.this);
-        onSaved.accept(VideoSlacePanel.this);
+        onDoSelect.accept(VideoSlicePanel.this);
+        onSaved.accept(VideoSlicePanel.this);
       }
     });
     
@@ -112,7 +111,7 @@ public class VideoSlacePanel extends AbstractPanel  {
     closeButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        onClosed.accept(VideoSlacePanel.this);
+        onClosed.accept(VideoSlicePanel.this);
       }
     });
     
@@ -131,13 +130,13 @@ public class VideoSlacePanel extends AbstractPanel  {
     
     MouseListener s1 = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        onSelected.accept(VideoSlacePanel.this);
+        onSelected.accept(VideoSlicePanel.this);
       }
     };
     
     MouseListener s2 = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        onDoSelect.accept(VideoSlacePanel.this);
+        onDoSelect.accept(VideoSlicePanel.this);
       }
     };
 
@@ -154,45 +153,46 @@ public class VideoSlacePanel extends AbstractPanel  {
     this.startTime.setText(slice.startString());
     this.endTime.setText(slice.endString());
     this.lengthTime.setText(slice.timeString());
+    this.saveButton.setEnabled(slice.end() < Long.MAX_VALUE);
     return this.slice;
   }
 
-  public final VideoSlacePanel setOnClosed(Consumer<JPanel> onClosed) {
+  public final VideoSlicePanel setOnClosed(Consumer<JPanel> onClosed) {
     if (onClosed != null) {
       this.onClosed = onClosed;
     }
     return this;
   }
 
-  public final VideoSlacePanel setOnPlay(Consumer<JPanel> onPlay) {
+  public final VideoSlicePanel setOnPlay(Consumer<JPanel> onPlay) {
     if (onPlay != null) {
       this.onPlay = onPlay;
     }
     return this;
   }
 
-  public final VideoSlacePanel setOnStop(Consumer<JPanel> onStop) {
+  public final VideoSlicePanel setOnStop(Consumer<JPanel> onStop) {
     if (onStop != null) {
       this.onStoped = onStop;
     }
     return this;
   }
 
-  public final VideoSlacePanel setOnSave(Consumer<JPanel> onSave) {
+  public final VideoSlicePanel setOnSave(Consumer<JPanel> onSave) {
     if (onSave != null) {
       this.onSaved = onSave;
     }
     return this;
   }
   
-  public final VideoSlacePanel setOnSelected(Consumer<JPanel> onSelect) {
+  public final VideoSlicePanel setOnSelected(Consumer<JPanel> onSelect) {
     if (onSelect != null) {
       this.onSelected = onSelect;
     }
     return this;
   }
 
-  public final VideoSlacePanel setOnDoSelect(Consumer<JPanel> onDoSelect) {
+  public final VideoSlicePanel setOnDoSelect(Consumer<JPanel> onDoSelect) {
     if (onDoSelect != null) {
       this.onDoSelect = onDoSelect;
     }
