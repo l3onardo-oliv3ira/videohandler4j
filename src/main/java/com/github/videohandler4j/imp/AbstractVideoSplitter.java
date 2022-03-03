@@ -33,7 +33,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
   private int bitRate = -1;
 
   public AbstractVideoSplitter() {
-    this(new VideoSlice());
+    this(new DefaultVideoSlice());
   }
   
   public AbstractVideoSplitter(IVideoSlice... ranges) {

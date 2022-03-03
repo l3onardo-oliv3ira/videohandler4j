@@ -2,21 +2,21 @@ package com.github.videohandler4j.imp;
 
 import static com.github.videohandler4j.imp.TimeTools.toHmsString;
 
-import com.github.filehandler4j.imp.FileSlice;
+import com.github.filehandler4j.imp.DefaultFileSlice;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoSlice;
 
-public final class VideoSlice extends FileSlice implements IVideoSlice {
+public final class DefaultVideoSlice extends DefaultFileSlice implements IVideoSlice {
 
-  public VideoSlice() {
+  public DefaultVideoSlice() {
     this(0);
   }
 
-  public VideoSlice(long startTime) {
+  public DefaultVideoSlice(long startTime) {
     this(startTime, Long.MAX_VALUE);
   }
   
-  public VideoSlice(long startTime, long endTime) {
+  public DefaultVideoSlice(long startTime, long endTime) {
     super(startTime, endTime);
   }
 
@@ -39,7 +39,7 @@ public final class VideoSlice extends FileSlice implements IVideoSlice {
   public long end(IVideoFile file) {
     return Math.min(super.end(), file.getDuration().toMillis());
   }
-
+  
   @Override
   public String outputFileName(IVideoFile file) {
     return toHmsString(start()) + "_ate_" + toHmsString(end(file));
@@ -48,7 +48,7 @@ public final class VideoSlice extends FileSlice implements IVideoSlice {
   @Override
   public String endString() {
     long end = super.end();
-    return Long.MAX_VALUE == end ? "--:--:--" : TimeTools.toString(end);
+    return Long.MAX_VALUE == end ? "__:__:__" : TimeTools.toString(end);
   }
 
   @Override
@@ -59,6 +59,6 @@ public final class VideoSlice extends FileSlice implements IVideoSlice {
   @Override
   public String timeString() {
     long end = super.end();
-    return end == Long.MAX_VALUE ? "--:--:--" : TimeTools.toString(getTime());
+    return end == Long.MAX_VALUE ? "__:__:__" : TimeTools.toString(getTime());
   }
 }

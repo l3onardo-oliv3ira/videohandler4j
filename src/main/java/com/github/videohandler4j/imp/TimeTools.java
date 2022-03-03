@@ -37,19 +37,19 @@ public class TimeTools {
     long div = timeMillis / ONE_HOUR.toMillis();
     long mod = timeMillis % ONE_HOUR.toMillis();
     if (mod == 0) {
-      return Long.toString(div) + hseparator + "00" + mseparator + "00";
+      return padStart(div, 2) + hseparator + "00" + mseparator + "00";
     }
     long hours = div;
     timeMillis -= hours * ONE_HOUR.toMillis();
     div = timeMillis / ONE_MINUTE.toMillis();
     mod = timeMillis % ONE_MINUTE.toMillis();
     if (mod == 0) {
-      return Long.toString(hours) + hseparator + padStart(div, 2) + mseparator + "00";
+      return padStart(hours, 2) + hseparator + padStart(div, 2) + mseparator + "00";
     }
     long minutes = div;
     timeMillis -= minutes * ONE_MINUTE.toMillis();
     div = timeMillis / ONE_SECOND.toMillis();
-    return Long.toString(hours) + hseparator + padStart(minutes, 2) + mseparator + padStart(div, 2);
+    return padStart(hours, 2) + hseparator + padStart(minutes, 2) + mseparator + padStart(div, 2);
   }
   
   public static Optional<Duration> parse(String duration) {
@@ -111,7 +111,7 @@ public class TimeTools {
     long durationVideoMillis = file.getDuration().toMillis();
     long durationSliceMillis = durationSlice.toMillis();
     for(long start = sliceStart; start < durationVideoMillis; start += durationSliceMillis) {
-      slices.add(new VideoSlice(start, Math.max(durationVideoMillis, start + durationSliceMillis)));
+      slices.add(new DefaultVideoSlice(start, Math.max(durationVideoMillis, start + durationSliceMillis)));
     }
     return slices.toArray(new IVideoSlice[slices.size()]);
   }

@@ -36,10 +36,10 @@ public class TestAll {
         
         long sliceStartMillis = 0;
         handler = new BySliceVideoSplitter(
-          new VideoSlice(sliceStartMillis, sliceStartMillis += _2minutes.toMillis()),
-          new VideoSlice(sliceStartMillis, sliceStartMillis += _3minutes.toMillis()),
-          new VideoSlice(sliceStartMillis, sliceStartMillis += _4minutes.toMillis()),
-          new VideoSlice(sliceStartMillis, file.getDuration(ChronoUnit.MILLIS))
+          new DefaultVideoSlice(sliceStartMillis, sliceStartMillis += _2minutes.toMillis()),
+          new DefaultVideoSlice(sliceStartMillis, sliceStartMillis += _3minutes.toMillis()),
+          new DefaultVideoSlice(sliceStartMillis, sliceStartMillis += _4minutes.toMillis()),
+          new DefaultVideoSlice(sliceStartMillis, file.getDuration(ChronoUnit.MILLIS))
         );
         break;
       case 1:
