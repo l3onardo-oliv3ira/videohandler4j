@@ -9,9 +9,13 @@ import com.github.videohandler4j.IVideoSlice;
 public final class VideoSlice extends FileSlice implements IVideoSlice {
 
   public VideoSlice() {
-    this(0, Long.MAX_VALUE);
+    this(0);
   }
 
+  public VideoSlice(long startTime) {
+    this(startTime, Long.MAX_VALUE);
+  }
+  
   public VideoSlice(long startTime, long endTime) {
     super(startTime, endTime);
   }
@@ -39,5 +43,22 @@ public final class VideoSlice extends FileSlice implements IVideoSlice {
   @Override
   public String outputFileName(IVideoFile file) {
     return toHmsString(start()) + "_ate_" + toHmsString(end(file));
+  }
+
+  @Override
+  public String endString() {
+    long end = super.end();
+    return Long.MAX_VALUE == end ? "--:--:--" : TimeTools.toString(end);
+  }
+
+  @Override
+  public String startString() {
+    return TimeTools.toString(start());
+  }
+
+  @Override
+  public String timeString() {
+    long end = super.end();
+    return end == Long.MAX_VALUE ? "--:--:--" : TimeTools.toString(getTime());
   }
 }
