@@ -1,7 +1,7 @@
 
 package com.github.videohandler4j.gui.imp;
 
-import static com.github.cutplayer4j.gui.imp.SwingTools.invokeLater;
+import static com.github.utils4j.gui.imp.SwingTools.invokeLater;
 import static com.github.utils4j.imp.Strings.defaultLatin;
 import static com.github.utils4j.imp.Strings.text;
 import static com.github.utils4j.imp.Threads.startAsync;
@@ -231,8 +231,10 @@ public class VideoSlicePanel extends AbstractPanel  {
             .add(file)
             .output(outputFolder.toPath())
             .build()
-          ).subscribe();
+          )
+        .subscribe();
       } catch (Exception e1) {
+        //WE HAVE TO GO BACK HERE!
         return;
       } finally {
         hideProgress();

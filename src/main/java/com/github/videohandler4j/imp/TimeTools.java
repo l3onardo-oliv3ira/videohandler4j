@@ -34,6 +34,7 @@ public class TimeTools {
   }
   
   public static String toString(long timeMillis, char hseparator, char mseparator) {
+    Args.requireZeroPositive(timeMillis, "timiMillis < 0");
     long div = timeMillis / ONE_HOUR.toMillis();
     long mod = timeMillis % ONE_HOUR.toMillis();
     if (mod == 0) {
@@ -92,14 +93,14 @@ public class TimeTools {
     return slices(file, maxSliceFileSize, 0);
   }
   
-  public static IVideoSlice[] slices(IVideoFile file, long maxSize, long sliceStart) {
+  public static IVideoSlice[] slices(IVideoFile file, long maxSliceFileSize, long sliceStart) {
     Args.requireNonNull(file, "file is null");
-    Args.requireZeroPositive(maxSize, "maxSize < 0");
+    Args.requireZeroPositive(maxSliceFileSize, "maxSize < 0");
     Args.requireZeroPositive(sliceStart, "sliceStart < 0");
     long fileDurationMillis = file.getDuration().toMillis();
     long fileSize = file.length();
     long sizePerDuration = fileSize / fileDurationMillis;
-    long sliceDurationMillis = maxSize / sizePerDuration;
+    long sliceDurationMillis = maxSliceFileSize / sizePerDuration;
     return slices(file, Duration.ofMillis(sliceDurationMillis), sliceStart);
   }
   

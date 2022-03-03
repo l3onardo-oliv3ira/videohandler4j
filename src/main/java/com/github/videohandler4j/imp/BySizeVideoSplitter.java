@@ -4,7 +4,7 @@ import static com.github.videohandler4j.imp.TimeTools.slices;
 
 import java.io.File;
 
-import com.github.filehandler4j.imp.ArrayIterator;
+import com.github.utils4j.imp.ArrayIterator;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoSlice;
 

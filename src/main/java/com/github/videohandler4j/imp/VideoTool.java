@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import com.github.filehandler4j.imp.FileWrapper;
 import com.github.utils4j.IConstants;
+import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.Environment;
 import com.github.utils4j.imp.Streams;
 import com.github.utils4j.imp.Strings;
@@ -34,6 +35,7 @@ public enum VideoTool implements Caller<File, IVideoFile, VideoDurationNotFound>
 
   @Override
   public IVideoFile call(File file) throws VideoDurationNotFound {
+    Args.requireNonNull(file, "input is null");
     try {
       Path ffmpeg = fullPath().orElseThrow(() -> new FFMpegNotFoundException());
       final Process process = new ProcessBuilder(
