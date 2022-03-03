@@ -1,9 +1,9 @@
 
 package com.github.videohandler4j.gui.imp;
 
+import static com.github.cutplayer4j.gui.imp.SwingTools.invokeLater;
 import static com.github.utils4j.imp.Strings.defaultLatin;
 import static com.github.utils4j.imp.Strings.text;
-import static com.github.utils4j.imp.SwingTools.invokeLater;
 import static com.github.utils4j.imp.Threads.startAsync;
 import static com.github.videohandler4j.imp.VideoTool.FFMPEG;
 
