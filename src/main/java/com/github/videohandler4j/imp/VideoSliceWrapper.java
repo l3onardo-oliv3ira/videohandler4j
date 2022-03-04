@@ -1,7 +1,7 @@
 package com.github.videohandler4j.imp;
 
 import com.github.filehandler4j.imp.FileSliceWrapper;
-import com.github.videohandler4j.IVideoFile;
+import com.github.utils4j.IDurationProvider;
 import com.github.videohandler4j.IVideoSlice;
 
 public class VideoSliceWrapper extends FileSliceWrapper implements IVideoSlice {
@@ -19,12 +19,12 @@ public class VideoSliceWrapper extends FileSliceWrapper implements IVideoSlice {
   }
 
   @Override
-  public long getTime(IVideoFile file) {
+  public long getTime(IDurationProvider file) {
     return slice().getTime(file);
   }
 
   @Override
-  public long end(IVideoFile file) {
+  public long end(IDurationProvider file) {
     return slice().end(file);
   }
 
@@ -49,7 +49,7 @@ public class VideoSliceWrapper extends FileSliceWrapper implements IVideoSlice {
   }
 
   @Override
-  public String outputFileName(IVideoFile file) {
+  public String outputFileName(IDurationProvider file) {
     return slice().outputFileName(file);
   }
 }

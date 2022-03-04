@@ -5,9 +5,7 @@ import java.util.function.Consumer;
 
 import javax.swing.JPanel;
 
-import com.github.utils4j.ICanceller;
-
-public interface IVideoSliceView extends IVideoSlice, ICanceller {
+public interface IVideoSliceView extends IVideoSlice {
   IVideoSliceView setOnDoSelect(Consumer<IVideoSliceView> onDoSelect);
   IVideoSliceView setOnClosed(Consumer<IVideoSliceView> onClosed);
   IVideoSliceView setOnPlay(Consumer<IVideoSliceView> onPlay);

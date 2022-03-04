@@ -4,11 +4,11 @@ import static com.github.videohandler4j.imp.TimeTools.slices;
 
 import java.time.Duration;
 
-import com.github.videohandler4j.IVideoFile;
+import com.github.utils4j.IDurationProvider;
 
 public class ByDurationVideoSplitter extends AbstractVideoSplitter{
 
-  public ByDurationVideoSplitter(IVideoFile file, Duration maxSliceDuration) {
+  public ByDurationVideoSplitter(IDurationProvider file, Duration maxSliceDuration) {
     super(slices(file, maxSliceDuration));
   }
 }

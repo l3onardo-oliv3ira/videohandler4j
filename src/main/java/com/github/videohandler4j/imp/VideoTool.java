@@ -30,7 +30,7 @@ public enum VideoTool implements Caller<File, IVideoFile, VideoDurationNotFound>
   }
   
   public final Optional<Path> fullPath() {
-    return Environment.pathFrom("FFMPEG_HOME", fileName);
+    return Environment.resolveTo("FFMPEG_HOME", fileName, true, true);
   }
 
   @Override

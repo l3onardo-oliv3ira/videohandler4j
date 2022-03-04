@@ -45,6 +45,8 @@ public class VideoSlicePanel extends AbstractPanel  {
   
   private final Icon closeIcon = newIcon("close");
   
+  private final Icon cancelIcon = newIcon("cancel");
+  
   private final JTextField txtFragName = new JTextField();
   
   private final JLabel startTime = new JLabel("--:--:--");
@@ -60,6 +62,8 @@ public class VideoSlicePanel extends AbstractPanel  {
   private final JButton closeButton = new StandardButton();
   
   private final JButton saveButton = new StandardButton();
+  
+  private final JButton cancelButton = new StandardButton();
   
   private final JProgressBar progress = new JProgressBar();
 
@@ -115,7 +119,19 @@ public class VideoSlicePanel extends AbstractPanel  {
       }
     });
     
-    progress.setVisible(false);
+    cancelButton.setIcon(cancelIcon);
+    cancelButton.setVisible(true);
+    cancelButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (async != null) {
+          async.interrupt();
+        }
+      }
+    });
+    
+    
+    progress.setVisible(true);
 
     setLayout(new MigLayout());
     add(txtFragName, "span, pushx, growx, wrap");
@@ -126,7 +142,9 @@ public class VideoSlicePanel extends AbstractPanel  {
     add(saveButton);
     add(lengthTime);
     add(closeButton, "al right, wrap");
-    add(progress, "span, pushx, growx");
+    
+//    add(progress, "growx");
+//    add(cancelButton, "al right");
     
     MouseListener s1 = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
@@ -148,7 +166,7 @@ public class VideoSlicePanel extends AbstractPanel  {
     refresh(slice);
   }
   
-  public IVideoSlice refresh(IVideoSlice slice) {
+  public final IVideoSlice refresh(IVideoSlice slice) {
     this.slice = slice;
     this.startTime.setText(slice.startString());
     this.endTime.setText(slice.endString());
@@ -205,19 +223,27 @@ public class VideoSlicePanel extends AbstractPanel  {
       this.progress.setStringPainted(true);
       this.progress.setString(text);
       this.progress.setVisible(true);
+      this.cancelButton.setVisible(true);
+      VideoSlicePanel.this.add(progress, "span, pushx, growx");
+      VideoSlicePanel.this.updateUI();
     });
   }
   
   private void hideProgress() {
     invokeLater(() -> {
       this.progress.setVisible(false);
+      this.cancelButton.setVisible(false);
+      VideoSlicePanel.this.remove(progress);
+      VideoSlicePanel.this.updateUI();
     });
   }
 
+  private volatile Thread async;
+  
   public void splitAndSave(File outputFile, File outputFolder) {
     Args.requireExists(outputFile, "outputFile does not exists");
     Args.requireNonNull(outputFolder, "outputFolder does not exists");
-    startAsync("fatia: de " + slice.startString() + " ate " + slice.endString(), () -> {
+    async = startAsync("fatia: de " + slice.startString() + " ate " + slice.endString(), () -> {
       try {
         showProgress("Processando divisão...");
         IVideoFile file = FFMPEG.call(outputFile);
@@ -237,6 +263,7 @@ public class VideoSlicePanel extends AbstractPanel  {
         //WE HAVE TO GO BACK HERE!
         return;
       } finally {
+        async = null;
         hideProgress();
       }
     });

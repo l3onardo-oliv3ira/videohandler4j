@@ -72,11 +72,6 @@ public class VideoSliceView extends VideoSliceWrapper implements IVideoSliceView
   }
   
   @Override
-  public void cancelCode(Runnable cancelCode) {
-    
-  }
-
-  @Override
   public void splitAndSave(File input, File folder) {
     panel.splitAndSave(input, folder);
   }

@@ -1,14 +1,15 @@
 package com.github.videohandler4j;
 
 import com.github.filehandler4j.IFileSlice;
+import com.github.utils4j.IDurationProvider;
 
 public interface IVideoSlice extends IFileSlice {
 
   long getTime();
 
-  long getTime(IVideoFile file);
+  long getTime(IDurationProvider file);
   
-  long end(IVideoFile file);
+  long end(IDurationProvider file);
   
   String startString();
   
@@ -18,6 +19,6 @@ public interface IVideoSlice extends IFileSlice {
 
   String outputFileName();
   
-  String outputFileName(IVideoFile file);
+  String outputFileName(IDurationProvider file);
 
 }

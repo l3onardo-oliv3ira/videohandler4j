@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.utils4j.IDurationProvider;
 import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.Strings;
 import com.github.videohandler4j.IVideoFile;
@@ -85,7 +86,7 @@ public class TimeTools {
     return Optional.of(ofMillis(h.toMillis() + m.toMillis() + s.toMillis()));
   }
 
-  public static IVideoSlice[] slices(IVideoFile file, Duration maxSliceDuration) {
+  public static IVideoSlice[] slices(IDurationProvider file, Duration maxSliceDuration) {
     return slices(file, maxSliceDuration, 0);
   }
   
@@ -104,7 +105,7 @@ public class TimeTools {
     return slices(file, Duration.ofMillis(sliceDurationMillis), sliceStart);
   }
   
-  public static IVideoSlice[] slices(IVideoFile file, Duration durationSlice, long sliceStart) {
+  public static IVideoSlice[] slices(IDurationProvider file, Duration durationSlice, long sliceStart) {
     Args.requireNonNull(file, "file is null");
     Args.requireNonNull(durationSlice, "durationSlice is null");
     Args.requireZeroPositive(sliceStart, "sliceStart < 0");

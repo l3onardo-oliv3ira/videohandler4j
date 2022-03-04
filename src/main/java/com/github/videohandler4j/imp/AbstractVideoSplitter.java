@@ -146,8 +146,8 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
             emitter.onNext(new VideoOutputEvent("Gerado arquivo", currentOutput, next.getTime(file)));
           }
         }
-        next = next();
-      }while(next != null);
+        
+      }while((next = next()) != null);
     }      
   }
 
