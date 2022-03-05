@@ -113,7 +113,7 @@ public class TimeTools {
     long durationVideoMillis = file.getDuration().toMillis();
     long durationSliceMillis = durationSlice.toMillis();
     for(long start = sliceStart; start < durationVideoMillis; start += durationSliceMillis) {
-      slices.add(new DefaultVideoSlice(start, Math.max(durationVideoMillis, start + durationSliceMillis)));
+      slices.add(new DefaultVideoSlice(start, Math.min(durationVideoMillis, start + durationSliceMillis)));
     }
     return slices.toArray(new IVideoSlice[slices.size()]);
   }

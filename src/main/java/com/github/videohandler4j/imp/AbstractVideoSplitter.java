@@ -13,7 +13,7 @@ import java.util.List;
 import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
 import com.github.utils4j.IConstants;
-import com.github.utils4j.ResetableIterator;
+import com.github.utils4j.IResetableIterator;
 import com.github.utils4j.imp.ArrayIterator;
 import com.github.utils4j.imp.Containers;
 import com.github.utils4j.imp.States;
@@ -45,7 +45,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     this.bitRate = bitRate;
   }
   
-  public AbstractVideoSplitter(ResetableIterator<IVideoSlice> iterator) {
+  public AbstractVideoSplitter(IResetableIterator<IVideoSlice> iterator) {
     super(iterator);
     this.reset();
   }
