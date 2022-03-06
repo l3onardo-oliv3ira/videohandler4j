@@ -26,6 +26,10 @@ public class TimeTools {
 
   private TimeTools() {}
   
+  public static String stringNow() {
+    return toHmsString(System.currentTimeMillis());
+  }
+
   public static String toString(long timeMillis) {
     return toString(timeMillis, ':', ':');
   }
