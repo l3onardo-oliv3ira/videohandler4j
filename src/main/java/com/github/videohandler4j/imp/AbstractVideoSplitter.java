@@ -120,7 +120,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
               BufferedReader br = new BufferedReader(new InputStreamReader(input, IConstants.CP_850));
               String inputLine;
               while (!currentThread.isInterrupted() && (inputLine = br.readLine()) != null) {
-                emitter.onNext(new VideoInfoEvent(inputLine));
+                //emitter.onNext(new VideoInfoEvent(inputLine));
               }
             } catch (Exception e) {
               emitter.onError(e);
@@ -143,7 +143,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           if (!success) {
             currentOutput.delete();
           } else {
-            emitter.onNext(new VideoOutputEvent("Gerado arquivo", currentOutput, next.getTime(file)));
+            emitter.onNext(new VideoOutputEvent("Gerado arquivo " + currentOutput, currentOutput, next.getTime(file)));
           }
         }
         
