@@ -79,7 +79,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
       File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
 
       do {
-        currentOutput = resolve(next.outputFileName(file));
+        currentOutput = resolve(file.getShortName() + "_" + next.outputFileName(file));
         currentOutput.delete();
         
         List<String> commandLine = Containers.arrayList(
@@ -120,7 +120,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
               BufferedReader br = new BufferedReader(new InputStreamReader(input, IConstants.CP_850));
               String inputLine;
               while (!currentThread.isInterrupted() && (inputLine = br.readLine()) != null) {
-                //emitter.onNext(new VideoInfoEvent(inputLine));
+                emitter.onNext(new VideoInfoEvent(inputLine));
               }
             } catch (Exception e) {
               emitter.onError(e);
