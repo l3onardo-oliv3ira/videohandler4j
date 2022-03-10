@@ -20,6 +20,11 @@ public class BySizeVideoSplitter extends AbstractVideoSplitter{
   }
   
   @Override
+  protected boolean forceCopy(IVideoFile file) {
+    return file.length() <= maxSliceFileSize;
+  }
+  
+  @Override
   protected boolean accept(File sliceFile, IVideoSlice slice) {
     if (sliceFile.length() <= maxSliceFileSize) {
       return true;

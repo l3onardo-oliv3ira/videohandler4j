@@ -6,8 +6,11 @@ import static java.lang.Runtime.getRuntime;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.List;
 
 import com.github.filehandler4j.IInputFile;
@@ -73,6 +76,16 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
   protected void handle(IInputFile f, Emitter<IVideoInfoEvent> emitter) throws Exception {
     States.requireTrue(f instanceof IVideoFile, "file is not instance of VideoFile, please use VideoDescriptor instead");
     IVideoFile file = (IVideoFile)f;
+    
+    if (forceCopy(file)) {
+      currentOutput = resolve(file.getShortName() + "_" + new DefaultVideoSlice(0).outputFileName(file));
+      try(OutputStream out = new FileOutputStream(currentOutput)) {
+        Files.copy(file.toPath(), out);
+      }
+      emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, file.getDuration().toMillis()));
+      return;
+    }
+    
     IVideoSlice next = next();
     
     if (next != null) {
@@ -109,7 +122,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
 
         final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
         
-        emitter.onNext(new VideoInfoEvent("Processando arquivo " + file.getName() + " saida: " + currentOutput.getAbsolutePath()));
+        emitter.onNext(new VideoInfoEvent("Processing file: " + file.getName() + " output: " + currentOutput.getAbsolutePath()));
         
         boolean success = false;
 
@@ -123,16 +136,14 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
                 emitter.onNext(new VideoInfoEvent(inputLine));
               }
             } catch (Exception e) {
-              emitter.onError(e);
+              emitter.onNext(new VideoInfoEvent("Fail in thread: " + currentThread.getName() + ": " + e.getMessage()));
             }
           });
           try {
             success = process.waitFor() == 0 && accept(currentOutput, next);
-            reader.interrupt();
-            reader.join(2000);
+            interruptAndWait(reader);
           }catch(InterruptedException e) {
-            reader.interrupt();
-            reader.join(2000);
+            interruptAndWait(reader);
             Thread.currentThread().interrupt();
             throw e;
           }finally {
@@ -143,12 +154,21 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           if (!success) {
             currentOutput.delete();
           } else {
-            emitter.onNext(new VideoOutputEvent("Gerado arquivo " + currentOutput, currentOutput, next.getTime(file)));
+            emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));
           }
         }
         
       }while((next = next()) != null);
     }      
+  }
+
+  protected boolean forceCopy(IVideoFile file) {
+    return false;
+  }
+
+  private void interruptAndWait(Thread reader) throws InterruptedException {
+    reader.interrupt();
+    reader.join(2000);
   }
 
   protected boolean accept(File outputFile, IVideoSlice slice) {
