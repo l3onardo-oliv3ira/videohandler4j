@@ -78,7 +78,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     IVideoFile file = (IVideoFile)f;
     
     if (forceCopy(file)) {
-      currentOutput = resolve(file.getShortName() + "_" + new DefaultVideoSlice(0).outputFileName(file));
+      currentOutput = resolveOutput(file.getShortName() + "_" + new DefaultVideoSlice(0).outputFileName(file));
       try(OutputStream out = new FileOutputStream(currentOutput)) {
         Files.copy(file.toPath(), out);
       }
@@ -92,7 +92,9 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
       File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
 
       do {
-        currentOutput = resolve(file.getShortName() + "_" + next.outputFileName(file));
+        checkInterrupted();
+        
+        currentOutput = resolveOutput(file.getShortName() + "_" + next.outputFileName(file));
         currentOutput.delete();
         
         List<String> commandLine = Containers.arrayList(
@@ -125,6 +127,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         emitter.onNext(new VideoInfoEvent("Processing file: " + file.getName() + " output: " + currentOutput.getAbsolutePath()));
         
         boolean success = false;
+        boolean splitSuccess = false;
 
         try(InputStream input = process.getInputStream()) {
           Thread reader = Threads.startAsync("ffmpeg output reader", () -> {
@@ -140,7 +143,8 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
             }
           });
           try {
-            success = process.waitFor() == 0 && accept(currentOutput, next);
+            splitSuccess = process.waitFor() == 0;
+            success = splitSuccess && accept(currentOutput, next);
             interruptAndWait(reader);
           }catch(InterruptedException e) {
             interruptAndWait(reader);
@@ -153,6 +157,9 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           process.destroyForcibly();
           if (!success) {
             currentOutput.delete();
+            if (!splitSuccess) {
+              throw new Exception("FFMPEG não consegue dividir este vídeo: " + f.getAbsolutePath());
+            }
           } else {
             emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));
           }
