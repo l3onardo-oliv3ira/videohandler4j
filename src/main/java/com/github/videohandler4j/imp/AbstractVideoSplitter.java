@@ -86,7 +86,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
       return;
     }
     
-    IVideoSlice next = next();
+    IVideoSlice next = nextSlice();
     
     if (next != null) {
       File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
@@ -165,7 +165,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           }
         }
         
-      }while((next = next()) != null);
+      }while((next = nextSlice()) != null);
     }      
   }
 
