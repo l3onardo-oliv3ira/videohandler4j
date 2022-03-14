@@ -2,14 +2,12 @@
 package com.github.videohandler4j.gui.imp;
 
 import static com.github.utils4j.gui.imp.SwingTools.invokeLater;
-import static com.github.utils4j.imp.Strings.defaultLatin;
-import static com.github.utils4j.imp.Strings.text;
+import static com.github.utils4j.imp.Strings.empty;
+import static com.github.utils4j.imp.Strings.trim;
 import static com.github.utils4j.imp.Threads.startAsync;
 import static com.github.videohandler4j.imp.VideoTool.FFMPEG;
 
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -85,51 +83,35 @@ public class VideoSlicePanel extends AbstractPanel  {
     super("/vh4j/icons/buttons/");
     
     playPauseButton.setIcon(playIcon);
-    playPauseButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        onDoSelect.accept(VideoSlicePanel.this);
-        onPlay.accept(VideoSlicePanel.this);
-      }
+    playPauseButton.addActionListener((e) -> {
+      onDoSelect.accept(VideoSlicePanel.this);
+      onPlay.accept(VideoSlicePanel.this);
     });
     
     stopButton.setIcon(stopIcon);
-    stopButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        onDoSelect.accept(VideoSlicePanel.this);
-        onStoped.accept(VideoSlicePanel.this);
-      }
+    stopButton.addActionListener((e) -> {
+      onDoSelect.accept(VideoSlicePanel.this);
+      onStoped.accept(VideoSlicePanel.this);
     });
     
     saveButton.setIcon(saveIcon);
-    saveButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        onDoSelect.accept(VideoSlicePanel.this);
-        onSaved.accept(VideoSlicePanel.this);
-      }
+    saveButton.addActionListener((e) -> {
+      onDoSelect.accept(VideoSlicePanel.this);
+      onSaved.accept(VideoSlicePanel.this);
     });
     
     closeButton.setIcon(closeIcon);
-    closeButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        onClosed.accept(VideoSlicePanel.this);
-      }
+    closeButton.addActionListener((e) -> {
+      onClosed.accept(VideoSlicePanel.this);
     });
     
     cancelButton.setIcon(cancelIcon);
     cancelButton.setVisible(true);
-    cancelButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        if (async != null) {
-          async.interrupt();
-        }
+    cancelButton.addActionListener((e) -> {
+      if (async != null) {
+        async.interrupt();
       }
     });
-    
     
     progress.setVisible(true);
 
@@ -241,31 +223,32 @@ public class VideoSlicePanel extends AbstractPanel  {
   private volatile Thread async;
   
   public void splitAndSave(File outputFile, File outputFolder) {
-    Args.requireExists(outputFile, "outputFile does not exists");
-    Args.requireNonNull(outputFolder, "outputFolder does not exists");
-    async = startAsync("fatia: de " + slice.startString() + " ate " + slice.endString(), () -> {
-      try {
-        showProgress("Processando divisão...");
-        IVideoFile file = FFMPEG.call(outputFile);
-        String namePrefix = defaultLatin(text(txtFragName.getText()), 90)
-            .replaceAll("[\\\\/:*?\"<>|]", "");
-        if (!namePrefix.isEmpty())
-          namePrefix += '_';
-        new BySliceVideoSplitter(slice).apply(
-          new VideoDescriptor.Builder(".mp4")
-            .namePrefix(namePrefix)
-            .add(file)
-            .output(outputFolder.toPath())
-            .build()
-          )
-        .subscribe();
-      } catch (Exception e1) {
-        //WE HAVE TO GO BACK HERE!
-        return;
-      } finally {
-        async = null;
-        hideProgress();
-      }
-    });
+    if (this.saveButton.isEnabled()) {
+      Args.requireExists(outputFile, "outputFile does not exists");
+      Args.requireNonNull(outputFolder, "outputFolder does not exists");
+      async = startAsync("fatia: de " + slice.startString() + " ate " + slice.endString(), () -> {
+        try {
+          showProgress("Processando divisão...");
+          IVideoFile file = FFMPEG.call(outputFile);
+          String namePrefix = trim(txtFragName.getText()).replaceAll("[\\\\/:*?\"<>|]", empty());
+          if (!namePrefix.isEmpty())
+            namePrefix += '_';
+          new BySliceVideoSplitter(slice).apply(
+            new VideoDescriptor.Builder(".mp4")
+              .namePrefix(namePrefix)
+              .add(file)
+              .output(outputFolder.toPath())
+              .build()
+            )
+          .subscribe();
+        } catch (Exception e1) {
+          //WE HAVE TO GO BACK HERE!
+          return;
+        } finally {
+          async = null;
+          hideProgress();
+        }
+      });
+    }
   }
 }
