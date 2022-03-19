@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.github</groupId>
-  <artifactId>filehandler4j</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <artifactId>videohandler4j</artifactId>
+  <version>1.0</version>
 
   <name>filehandler4j</name>
   <!-- FIXME change it to the project's website -->
@@ -43,6 +43,12 @@
 		<artifactId>miglayout-swing</artifactId>
 		<version>5.2</version>
 	</dependency>
+	
+	<dependency>
+		<groupId>com.github</groupId>
+  		<artifactId>filehandler4j</artifactId>
+  		<version>1.0</version>
+    </dependency>
 	
   </dependencies>
 
@@ -90,5 +96,26 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    
+    <plugins>
+    	<plugin>
+    		<groupId>org.codehaus.mojo</groupId>
+    		<artifactId>build-helper-maven-plugin</artifactId>
+    		<version>3.3.0</version>
+    		<executions>
+		        <execution>
+		            <phase>generate-sources</phase>
+		            <goals>
+		                <goal>add-source</goal>
+		            </goals>
+		            <configuration>
+		                <sources>
+		                    <source>src/main/gui</source>
+		                </sources>
+		            </configuration>
+		        </execution>
+		    </executions>
+    	</plugin>
+    </plugins>
   </build>
 </project>
