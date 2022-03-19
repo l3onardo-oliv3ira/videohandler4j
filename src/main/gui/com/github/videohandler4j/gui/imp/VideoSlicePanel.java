@@ -5,7 +5,7 @@ import static com.github.utils4j.gui.imp.SwingTools.invokeLater;
 import static com.github.utils4j.imp.Strings.empty;
 import static com.github.utils4j.imp.Strings.trim;
 import static com.github.utils4j.imp.Threads.startAsync;
-import static com.github.videohandler4j.imp.VideoTool.FFMPEG;
+import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
 
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
@@ -23,6 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
 import com.github.utils4j.gui.imp.AbstractPanel;
+import com.github.utils4j.gui.imp.ExceptionAlert;
 import com.github.utils4j.imp.Args;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoSlice;
@@ -241,9 +242,8 @@ public class VideoSlicePanel extends AbstractPanel  {
               .build()
             )
           .subscribe();
-        } catch (Exception e1) {
-          //WE HAVE TO GO BACK HERE!
-          return;
+        } catch (Exception e) {
+          ExceptionAlert.show("Não foi possível dividir o vídeo", "Arquivo: " + outputFile.getAbsolutePath(), e);
         } finally {
           async = null;
           hideProgress();

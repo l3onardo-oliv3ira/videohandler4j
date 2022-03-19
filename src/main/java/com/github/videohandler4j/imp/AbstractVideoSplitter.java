@@ -1,6 +1,6 @@
 package com.github.videohandler4j.imp;
 
-import static com.github.videohandler4j.imp.VideoTool.FFMPEG;
+import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
 import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
 

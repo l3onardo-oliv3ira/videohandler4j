@@ -22,7 +22,7 @@ public class TestAll {
     Path baseInput = Paths.get("D:/temp/");
 
     for(int i = 0; i < outputPath.length; i++) {
-      IVideoFile file = VideoTool.FFMPEG.call(baseInput.resolve("video.mp4").toFile());
+      IVideoFile file = VideoTools.FFMPEG.call(baseInput.resolve("video.mp4").toFile());
       VideoDescriptor desc = new VideoDescriptor.Builder(".mp4")
         .add(file)
         .output(baseInput.resolve(outputPath[i]))
