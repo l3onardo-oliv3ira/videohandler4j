@@ -99,6 +99,10 @@ public class TimeTools {
   }
   
   public static IVideoSlice[] slices(IVideoFile file, long maxSliceFileSize, long sliceStart) {
+    return slices(file, maxSliceFileSize, sliceStart, 0);
+  }
+  
+  public static IVideoSlice[] slices(IVideoFile file, long maxSliceFileSize, long sliceStart, long previousMarging) {
     Args.requireNonNull(file, "file is null");
     Args.requireZeroPositive(maxSliceFileSize, "maxSize < 0");
     Args.requireZeroPositive(sliceStart, "sliceStart < 0");
@@ -106,10 +110,14 @@ public class TimeTools {
     long fileSize = file.length();
     long sizePerDuration = fileSize / fileDurationMillis;
     long sliceDurationMillis = maxSliceFileSize / sizePerDuration;
-    return slices(file, Duration.ofMillis(sliceDurationMillis), sliceStart);
+    return slices(file, Duration.ofMillis(sliceDurationMillis), sliceStart, previousMarging);
   }
   
   public static IVideoSlice[] slices(IDurationProvider file, Duration durationSlice, long sliceStart) {
+    return slices(file, durationSlice, sliceStart, 0);
+  }
+  
+  public static IVideoSlice[] slices(IDurationProvider file, Duration durationSlice, long sliceStart, long previousMarging) {
     Args.requireNonNull(file, "file is null");
     Args.requireNonNull(durationSlice, "durationSlice is null");
     Args.requireZeroPositive(sliceStart, "sliceStart < 0");
@@ -117,7 +125,7 @@ public class TimeTools {
     long durationVideoMillis = file.getDuration().toMillis();
     long durationSliceMillis = durationSlice.toMillis();
     for(long start = sliceStart; start < durationVideoMillis; start += durationSliceMillis) {
-      slices.add(new DefaultVideoSlice(start, Math.min(durationVideoMillis, start + durationSliceMillis)));
+      slices.add(new DefaultVideoSlice(Math.max(0, start - previousMarging), Math.min(durationVideoMillis, start + durationSliceMillis)));
     }
     return slices.toArray(new IVideoSlice[slices.size()]);
   }

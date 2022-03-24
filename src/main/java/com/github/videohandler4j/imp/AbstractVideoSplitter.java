@@ -32,6 +32,8 @@ import io.reactivex.Emitter;
 
 abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoEvent, IVideoSlice> {
 
+  protected static final long DEFAULT_PREVIOUS_MARGING = 0;// 3 * 1000; //three seconds previous
+  
   private File currentOutput = null;
   private int bitRate = -1;
 

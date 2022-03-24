@@ -8,11 +8,11 @@ import com.github.utils4j.IDurationProvider;
 import com.github.videohandler4j.IVideoFile;
 
 public class ByDurationVideoSplitter extends AbstractVideoSplitter{
-
+  
   private Duration maxSliceDuration;
   
   public ByDurationVideoSplitter(IDurationProvider file, Duration maxSliceDuration) {
-    super(slices(file, maxSliceDuration));
+    super(slices(file, maxSliceDuration, 0, DEFAULT_PREVIOUS_MARGING));
     this.maxSliceDuration = maxSliceDuration;
   }
   

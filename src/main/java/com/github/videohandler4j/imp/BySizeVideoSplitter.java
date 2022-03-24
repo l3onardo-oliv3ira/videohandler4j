@@ -14,7 +14,7 @@ public class BySizeVideoSplitter extends AbstractVideoSplitter{
   private float percent = 0.95f; //5 percent discount
   
   public BySizeVideoSplitter(IVideoFile file, long maxSliceFileSize) {
-    super(slices(file, maxSliceFileSize));
+    super(slices(file, maxSliceFileSize, 0, DEFAULT_PREVIOUS_MARGING));
     this.maxSliceFileSize = maxSliceFileSize;
     this.file = file;
   }
@@ -31,7 +31,7 @@ public class BySizeVideoSplitter extends AbstractVideoSplitter{
     }
     long smallerSize = (long)(percent * maxSliceFileSize);
     percent -= 0.05; //5 percent discount
-    setIterator(new ArrayIterator<IVideoSlice>(slices(file, smallerSize, slice.start())));
+    setIterator(new ArrayIterator<IVideoSlice>(slices(file, smallerSize, slice.start(), DEFAULT_PREVIOUS_MARGING)));
     return false;
   } 
 }
