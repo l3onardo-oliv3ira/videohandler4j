@@ -149,7 +149,9 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           commandLine.add("-c");
           commandLine.add("copy");
         }
-        commandLine.add(currentOutput.getAbsolutePath());
+        final String outputPath = currentOutput.getAbsolutePath();
+        
+        commandLine.add(outputPath);
 
         final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
         
@@ -187,7 +189,11 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           if (!success) {
             currentOutput.delete();
             if (!splitSuccess) {
-              throw new Exception("FFMPEG não consegue dividir este vídeo: " + f.getAbsolutePath());
+              String message = "FFMPEG não consegue dividir este vídeo: " + f.getAbsolutePath() + "\n";
+              if (outputPath.length() >= 255)
+                message = "O caminho dos arquivos ultrapassa 256 caracteres. Tente diminuir o comprimento do nome do arquivo ou a hierarquia de pastas";
+              emitter.onNext(new VideoInfoEvent(message));
+              throw new Exception(message);
             }
           } else {
             emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));
