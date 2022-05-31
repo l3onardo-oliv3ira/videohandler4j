@@ -65,7 +65,7 @@ public enum VideoTools implements Caller<File, IVideoFile, VideoDurationNotFound
     return Optional.ofNullable(findPath());
   }
 
-  private final Path findPath() {
+  private final synchronized Path findPath() {
     return Environment.resolveTo("FFMPEG_HOME", fileName, true, true).orElseGet(() -> {
       String home = trim(getProperty("user.home", ""));
       if (home.isEmpty())
