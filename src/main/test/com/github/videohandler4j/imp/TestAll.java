@@ -27,7 +27,6 @@
 
 package com.github.videohandler4j.imp;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -38,7 +37,7 @@ import com.github.videohandler4j.IVideoFile;
 
 public class TestAll {
   
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws Exception {
     
     final String[] outputPath = new String[] {
       "byslice",
