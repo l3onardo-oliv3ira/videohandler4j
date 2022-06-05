@@ -164,7 +164,7 @@ public class VideoSlicePanel extends AbstractPanel  {
     
     MouseListener s2 = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        onDoSelect.accept(VideoSlicePanel.this);
+        onSelected.accept(VideoSlicePanel.this);
       }
     };
 
