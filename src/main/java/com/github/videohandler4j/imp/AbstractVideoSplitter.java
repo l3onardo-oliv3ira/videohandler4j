@@ -102,13 +102,19 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     super.reset();
   }  
   
+  private static String sliceText(long slice) {
+    return "Parte " + Strings.padStart(slice, 2) + " - ";
+  }
+  
   @Override
   protected void handle(IInputFile f, Emitter<IVideoInfoEvent> emitter) throws Exception {
     States.requireTrue(f instanceof IVideoFile, "file is not instance of VideoFile, please use VideoDescriptor instead");
     IVideoFile file = (IVideoFile)f;
+
+    int slice = 1;
     
     if (forceCopy(file)) {
-      currentOutput = resolveOutput(file.getShortName() + "_" + new DefaultVideoSlice(0).outputFileName(file));
+      currentOutput = resolveOutput(sliceText(slice) + file.getShortName() + "_" + new DefaultVideoSlice(0).outputFileName(file));
       try(OutputStream out = new FileOutputStream(currentOutput)) {
         Files.copy(file.toPath(), out);
       }
@@ -124,7 +130,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
       do {
         checkInterrupted();
         
-        currentOutput = resolveOutput(file.getShortName() + "_" + next.outputFileName(file));
+        currentOutput = resolveOutput(sliceText(slice) + file.getShortName() + "_" + next.outputFileName(file));
         currentOutput.delete();
         
         List<String> commandLine = Containers.arrayList(
@@ -188,7 +194,8 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         }finally {
           process.destroyForcibly();
           if (success) {
-            emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));
+            slice++;
+            emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));            
           } else {
             currentOutput.delete();
             if (!splitSuccess) {

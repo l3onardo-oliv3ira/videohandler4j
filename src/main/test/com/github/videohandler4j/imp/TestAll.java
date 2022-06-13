@@ -43,14 +43,15 @@ public class TestAll {
       "byslice",
       "byduration",
       "bysize",
-      "byaudio"
+      "byaudio",
+      "bywebm"
     };
     
-    Path baseInput = Paths.get("D:/temp/");
+    Path baseInput = Paths.get("E:\\jfms\\test-shell\\videos\\audiencia\\");
 
     for(int i = 0; i < outputPath.length; i++) {
-      IVideoFile file = VideoTools.FFMPEG.call(baseInput.resolve("video.mp4").toFile());
-      VideoDescriptor desc = new VideoDescriptor.Builder(i == 3 ? ".ogg" : ".mp4")
+      IVideoFile file = VideoTools.FFMPEG.call(baseInput.resolve("fim.mp4").toFile());
+      VideoDescriptor desc = new VideoDescriptor.Builder(i == 3 ? ".ogg" : (i == 4 ? ".webm" : ".mp4"))
         .add(file)
         .output(baseInput.resolve(outputPath[i]))
         .build();
@@ -79,6 +80,9 @@ public class TestAll {
         break;
       case 3:
         handler = new OggAudioExtractor();
+        break;
+      case 4:
+        handler = new WEBMConverter();
         break;
       }
       if (handler != null) {
