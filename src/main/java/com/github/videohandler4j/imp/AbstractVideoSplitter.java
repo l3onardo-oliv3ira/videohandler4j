@@ -47,6 +47,7 @@ import com.github.utils4j.IResetableIterator;
 import com.github.utils4j.imp.ArrayIterator;
 import com.github.utils4j.imp.Containers;
 import com.github.utils4j.imp.States;
+import com.github.utils4j.imp.Strings;
 import com.github.utils4j.imp.Threads;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoInfoEvent;
@@ -149,7 +150,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           commandLine.add("-c");
           commandLine.add("copy");
         }
-        final String outputPath = currentOutput.getAbsolutePath();
+        final String outputPath = currentOutput.getCanonicalPath();
         
         commandLine.add(outputPath);
 
@@ -167,7 +168,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
               BufferedReader br = new BufferedReader(new InputStreamReader(input, IConstants.CP_850));
               String inputLine;
               while (!currentThread.isInterrupted() && (inputLine = br.readLine()) != null) {
-                emitter.onNext(new VideoInfoEvent(inputLine));
+                emitter.onNext(new VideoInfoEvent(Strings.replace(inputLine, '%', '#')));
               }
             } catch (Exception e) {
               emitter.onNext(new VideoInfoEvent("Fail in thread: " + currentThread.getName() + ": " + e.getMessage()));
@@ -186,31 +187,26 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           }
         }finally {
           process.destroyForcibly();
-          if (!success) {
+          if (success) {
+            emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));
+          } else {
             currentOutput.delete();
             if (!splitSuccess) {
-              String message = "FFMPEG não consegue dividir este vídeo: " + f.getAbsolutePath() + "\n";
+              String message = "FFMPEG não pôde dividir este vídeo: " + f.getAbsolutePath();
               if (outputPath.length() >= 255)
-                message = "O caminho dos arquivos ultrapassa 256 caracteres. Tente diminuir o comprimento do nome do arquivo ou a hierarquia de pastas";
+                message = "\nO caminho dos arquivos ultrapassa 256 caracteres. Tente diminuir o comprimento do nome do "
+                    + "arquivo ou a hierarquia de pastas";
               emitter.onNext(new VideoInfoEvent(message));
               throw new Exception(message);
             }
-          } else {
-            emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));
           }
         }
-        
       }while((next = nextSlice()) != null);
     }      
   }
 
   protected boolean forceCopy(IVideoFile file) {
     return false;
-  }
-
-  private void interruptAndWait(Thread reader) throws InterruptedException {
-    reader.interrupt();
-    reader.join(2000);
   }
 
   protected boolean accept(File outputFile, IVideoSlice slice) {

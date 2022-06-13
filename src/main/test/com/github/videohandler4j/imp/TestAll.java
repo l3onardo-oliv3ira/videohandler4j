@@ -42,14 +42,15 @@ public class TestAll {
     final String[] outputPath = new String[] {
       "byslice",
       "byduration",
-      "bysize"
+      "bysize",
+      "byaudio"
     };
     
     Path baseInput = Paths.get("D:/temp/");
 
     for(int i = 0; i < outputPath.length; i++) {
       IVideoFile file = VideoTools.FFMPEG.call(baseInput.resolve("video.mp4").toFile());
-      VideoDescriptor desc = new VideoDescriptor.Builder(".mp4")
+      VideoDescriptor desc = new VideoDescriptor.Builder(i == 3 ? ".ogg" : ".mp4")
         .add(file)
         .output(baseInput.resolve(outputPath[i]))
         .build();
@@ -65,7 +66,7 @@ public class TestAll {
           new DefaultVideoSlice(sliceStartMillis, sliceStartMillis += _2minutes.toMillis()),
           new DefaultVideoSlice(sliceStartMillis, sliceStartMillis += _3minutes.toMillis()),
           new DefaultVideoSlice(sliceStartMillis, sliceStartMillis += _4minutes.toMillis()),
-          new DefaultVideoSlice(sliceStartMillis, file.getDuration(ChronoUnit.MILLIS))
+          new DefaultVideoSlice(sliceStartMillis, file.getDuration().toMillis())
         );
         break;
       case 1:
@@ -75,6 +76,9 @@ public class TestAll {
       case 2:
         final long maxSliceSize = 20 * 1024 * 1024; //20MB
         handler = new BySizeVideoSplitter(file, maxSliceSize);
+        break;
+      case 3:
+        handler = new OggAudioExtractor();
         break;
       }
       if (handler != null) {

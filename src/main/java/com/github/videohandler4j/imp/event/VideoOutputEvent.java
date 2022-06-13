@@ -48,7 +48,7 @@ public class VideoOutputEvent extends FileOutputEvent implements IVideoOutputEve
 
   @Override
   public final String toString() {
-    return super.toString() + " totalPages: " + totalTime;
+    return super.toString() + " tamanho: " + totalTime;
   }
 
 }

@@ -41,7 +41,6 @@ import com.github.utils4j.IConstants;
 import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.Environment;
 import com.github.utils4j.imp.Streams;
-import com.github.utils4j.imp.Strings;
 import com.github.utils4j.imp.function.Caller;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.imp.exception.FFMpegNotFoundException;
@@ -72,11 +71,13 @@ public enum VideoTools implements Caller<File, IVideoFile, VideoDurationNotFound
         "-hide_banner"
       ).redirectErrorStream(true).start();
       
-      String output = Strings.empty();
+      String output;
       try(InputStream input = process.getInputStream()) {
         output = Streams.readOutStream(input, IConstants.CP_850).get();
+        process.waitFor();
+      } finally {
+        process.destroyForcibly();
       }
-      process.waitFor();
       
       final String durationPrefix = "Duration: ";
       int idx = output.indexOf(durationPrefix);
