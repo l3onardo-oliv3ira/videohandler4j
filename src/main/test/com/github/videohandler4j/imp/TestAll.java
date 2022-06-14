@@ -30,7 +30,6 @@ package com.github.videohandler4j.imp;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 import com.github.filehandler4j.IFileHandler;
 import com.github.videohandler4j.IVideoFile;
@@ -82,7 +81,7 @@ public class TestAll {
         handler = new OggAudioExtractor();
         break;
       case 4:
-        handler = new WEBMConverter();
+        handler = new WebmConverter();
         break;
       }
       if (handler != null) {

@@ -13,6 +13,7 @@ import java.util.List;
 import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileHandler;
 import com.github.utils4j.IConstants;
+import com.github.utils4j.imp.Containers;
 import com.github.videohandler4j.IVideoInfoEvent;
 import com.github.videohandler4j.imp.event.VideoInfoEvent;
 import com.github.videohandler4j.imp.event.VideoOutputEvent;
@@ -22,7 +23,7 @@ import io.reactivex.Emitter;
 
 public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent> {
 
-  protected abstract List<String> getCommandLine(File ffmpegPath, IInputFile file);
+  protected abstract void fillParameters(List<String> parameters);
   
   @Override
   protected final void handle(IInputFile file, Emitter<IVideoInfoEvent> emitter) throws Exception {
@@ -32,7 +33,17 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
     File currentOutput = resolveOutput(file.getShortName() + ".mp4");
     currentOutput.delete();
 
-    List<String> commandLine = getCommandLine(ffmpegHome, file);
+    List<String> commandLine = Containers.arrayList(
+      ffmpegHome.getAbsolutePath(),
+      "-y",
+      "-i",
+      file.getAbsolutePath(),
+      "-stats_period",
+      "1.5",
+      "-hide_banner"
+    );
+    
+    fillParameters(commandLine);    
     
     commandLine.add(currentOutput.getCanonicalPath());
 
