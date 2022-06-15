@@ -261,7 +261,7 @@ public class VideoSlicePanel extends AbstractPanel  {
           String namePrefix = trim(txtFragName.getText()).replaceAll("[\\\\/:*?\"<>|]", empty());
           if (!namePrefix.isEmpty())
             namePrefix += '_';
-          new BySliceVideoSplitter(slice).apply(
+          new BySliceVideoSplitter(false, slice).apply(
             new VideoDescriptor.Builder(".mp4")
               .namePrefix(namePrefix)
               .add(file)

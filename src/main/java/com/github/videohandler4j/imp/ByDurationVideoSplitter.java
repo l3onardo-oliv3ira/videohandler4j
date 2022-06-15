@@ -39,7 +39,7 @@ public class ByDurationVideoSplitter extends AbstractVideoSplitter{
   private Duration maxSliceDuration;
   
   public ByDurationVideoSplitter(IDurationProvider file, Duration maxSliceDuration) {
-    super(slices(file, maxSliceDuration, 0, DEFAULT_PREVIOUS_MARGING));
+    super(true, slices(file, maxSliceDuration, 0, DEFAULT_PREVIOUS_MARGING));
     this.maxSliceDuration = maxSliceDuration;
   }
   

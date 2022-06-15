@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.List;
 
 import com.github.filehandler4j.IInputFile;
@@ -63,24 +64,24 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
   protected static final long DEFAULT_PREVIOUS_MARGING = 0;// 3 * 1000; //three seconds previous
   
   private File currentOutput = null;
-  private int bitRate = -1;
+  private final boolean partPrefix;
 
   public AbstractVideoSplitter() {
-    this(new DefaultVideoSlice());
+    this(true);
   }
   
-  public AbstractVideoSplitter(IVideoSlice... ranges) {
-    this(-1, ranges);
+  public AbstractVideoSplitter(boolean partPrefix) {
+    this(partPrefix, new DefaultVideoSlice());
   }
   
-  public AbstractVideoSplitter(int bitRate, IVideoSlice... ranges) {
-    this(new ArrayIterator<IVideoSlice>(ranges));
-    this.bitRate = bitRate;
+  public AbstractVideoSplitter(boolean partPrefix, IVideoSlice... ranges) {
+    this(partPrefix, new ArrayIterator<IVideoSlice>(ranges));
   }
   
-  public AbstractVideoSplitter(IResetableIterator<IVideoSlice> iterator) {
+  public AbstractVideoSplitter(boolean partPrefix, IResetableIterator<IVideoSlice> iterator) {
     super(iterator);
     this.reset();
+    this.partPrefix = partPrefix;
   }
   
   @Override
@@ -102,8 +103,8 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     super.reset();
   }  
   
-  private static String sliceText(long slice) {
-    return "Parte " + Strings.padStart(slice, 2) + " - ";
+  private String sliceText(long slice) {
+    return partPrefix ? "": "Parte " + Strings.padStart(slice, 2) + " - ";
   }
   
   @Override
@@ -124,6 +125,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     
     IVideoSlice next = nextSlice();
     
+    
     if (next != null) {
       File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
 
@@ -133,29 +135,30 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         currentOutput = resolveOutput(sliceText(slice) + file.getShortName() + "_" + next.outputFileName(file));
         currentOutput.delete();
         
+        long start = next.start();
+
+        Duration duration = Duration.ofMillis(next.end(file) - start);
+
         List<String> commandLine = Containers.arrayList(
           ffmpegHome.getCanonicalPath(),
           "-y",
-          "-i",
-          file.getAbsolutePath(),
+          "-nostdin",
           "-threads",
           Long.toString(max(getRuntime().availableProcessors() - 1, 1)),
           "-hide_banner",
           "-ss",
-          TimeTools.toString(next.start()),
-          "-to",
-          TimeTools.toString(next.end(file)),
+          TimeTools.toString(start) + ".000",          
+          "-i",
+          file.getAbsolutePath(),
           "-max_muxing_queue_size",
           "89478485"
         );
         
-        if (bitRate > 0) {
-          commandLine.add("-b:v");
-          commandLine.add(bitRate + "k");
-        }else {
-          commandLine.add("-c");
-          commandLine.add("copy");
-        }
+        commandLine.add("-codec");
+        commandLine.add("copy");
+        commandLine.add("-t");
+        commandLine.add(Long.toString(duration.getSeconds()));
+
         final String outputPath = currentOutput.getCanonicalPath();
         
         commandLine.add(outputPath);

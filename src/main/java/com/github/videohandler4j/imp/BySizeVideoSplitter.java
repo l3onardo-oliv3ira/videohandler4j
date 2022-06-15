@@ -41,7 +41,11 @@ public class BySizeVideoSplitter extends AbstractVideoSplitter{
   private float percent = 0.95f; //5 percent discount
   
   public BySizeVideoSplitter(IVideoFile file, long maxSliceFileSize) {
-    super(slices(file, maxSliceFileSize, 0, DEFAULT_PREVIOUS_MARGING));
+    this(file, maxSliceFileSize, true);
+  }
+  
+  public BySizeVideoSplitter(IVideoFile file, long maxSliceFileSize, boolean partPrefix) {
+    super(partPrefix, slices(file, maxSliceFileSize, 0, DEFAULT_PREVIOUS_MARGING));
     this.maxSliceFileSize = maxSliceFileSize;
     this.file = file;
   }

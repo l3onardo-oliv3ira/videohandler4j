@@ -40,12 +40,16 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
       file.getAbsolutePath(),
       "-stats_period",
       "1.5",
-      "-hide_banner"
+      "-hide_banner",
+      "-nostdin"
     );
     
     fillParameters(commandLine);    
     
     commandLine.add(currentOutput.getCanonicalPath());
+    
+    commandLine.forEach(p -> System.out.print(" " + p));
+    System.out.println();
 
     final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
         

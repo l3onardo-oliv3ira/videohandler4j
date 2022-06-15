@@ -32,6 +32,10 @@ import com.github.videohandler4j.IVideoSlice;
 public class BySliceVideoSplitter extends AbstractVideoSplitter{
 
   public BySliceVideoSplitter(IVideoSlice... slices) {
-    super(slices);
+    this(true, slices);
+  }
+  
+  public BySliceVideoSplitter(boolean partPrefix, IVideoSlice... slices) {
+    super(partPrefix, slices);
   }
 }
