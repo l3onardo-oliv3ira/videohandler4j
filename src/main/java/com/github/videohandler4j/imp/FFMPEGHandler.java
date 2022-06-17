@@ -71,21 +71,23 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
         }
       });
       try {
-        success = process.waitFor() == 0;
+        if (success = process.waitFor() == 0) {
+          emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, file.length()));
+        };
         interruptAndWait(reader);
       }catch(InterruptedException e) {
-        interruptAndWait(reader);
-        Thread.currentThread().interrupt();
-        throw e;
+        if (!success) {
+          interruptAndWait(reader);
+          Thread.currentThread().interrupt();
+          throw e;
+        }
       }finally {
         reader = null;
       }
     }finally {
       process.destroyForcibly();
-      if (success) {
-        emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, file.length()));
-      } else {
-        startAsync(currentOutput::delete, 3000); //
+      if (!success) {
+        startAsync(currentOutput::delete, 3000); //delete file after delay
         if (!Thread.currentThread().isInterrupted()) {
           String outputPath = currentOutput.getCanonicalPath();
           String message = "FFMPEG não processou este vídeo: " + file.getAbsolutePath();

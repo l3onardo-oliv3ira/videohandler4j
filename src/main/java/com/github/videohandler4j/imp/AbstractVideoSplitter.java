@@ -103,8 +103,16 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     super.reset();
   }  
   
-  private String sliceText(long slice) {
-    return partPrefix ? "": "Parte " + Strings.padStart(slice, 2) + " - ";
+  private String computeOutputFileName(IVideoFile inputFile, long sliceId, IVideoSlice videoSlice) {
+    StringBuilder fileName = new StringBuilder();
+    if (partPrefix)
+      fileName.append("Parte " + Strings.padStart(sliceId,  2) + " - ");
+    else
+      fileName.append(inputFile.getShortName()).append('_');
+    fileName.append(videoSlice.outputFileName(inputFile));
+    if (partPrefix)
+      fileName.append('_').append(inputFile.getShortName());
+    return fileName.toString();
   }
   
   @Override
@@ -112,10 +120,10 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     States.requireTrue(f instanceof IVideoFile, "file is not instance of VideoFile, please use VideoDescriptor instead");
     IVideoFile file = (IVideoFile)f;
 
-    int slice = 1;
+    int sliceId = 1;
     
     if (forceCopy(file)) {
-      currentOutput = resolveOutput(sliceText(slice) + file.getShortName() + "_" + new DefaultVideoSlice(0).outputFileName(file));
+      currentOutput = resolveOutput(computeOutputFileName(file, sliceId, new DefaultVideoSlice(0)));
       try(OutputStream out = new FileOutputStream(currentOutput)) {
         Files.copy(file.toPath(), out);
       }
@@ -132,7 +140,8 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
       do {
         checkInterrupted();
         
-        currentOutput = resolveOutput(sliceText(slice) + file.getShortName() + "_" + next.outputFileName(file));
+        currentOutput = resolveOutput(computeOutputFileName(file, sliceId, next));
+        
         currentOutput.delete();
         
         long start = next.start();
@@ -197,7 +206,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         }finally {
           process.destroyForcibly();
           if (success) {
-            slice++;
+            sliceId++;
             emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));            
           } else {
             currentOutput.delete();
