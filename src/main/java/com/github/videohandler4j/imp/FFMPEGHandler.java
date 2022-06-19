@@ -48,9 +48,6 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
     
     commandLine.add(currentOutput.getCanonicalPath());
     
-    commandLine.forEach(p -> System.out.print(" " + p));
-    System.out.println();
-
     final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
         
     emitter.onNext(new VideoInfoEvent("Processing file: " + file.getName() + " output: " + currentOutput.getAbsolutePath()));
