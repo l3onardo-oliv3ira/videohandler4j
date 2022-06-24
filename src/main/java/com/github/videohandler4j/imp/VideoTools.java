@@ -65,7 +65,7 @@ public enum VideoTools implements Caller<File, IVideoFile, VideoDurationNotFound
     try {
       Path ffmpeg = fullPath().orElseThrow(FFMpegNotFoundException::new);
       final Process process = new ProcessBuilder(
-        ffmpeg.toFile().getAbsolutePath(),
+        ffmpeg.toFile().getCanonicalPath(),
         "-i",
         file.getAbsolutePath(),
         "-hide_banner"
