@@ -53,9 +53,7 @@ import com.github.progress4j.IProgressView;
 import com.github.progress4j.imp.ProgressFactory;
 import com.github.progress4j.imp.Stage;
 import com.github.utils4j.gui.imp.AbstractPanel;
-import com.github.utils4j.gui.imp.Dialogs;
 import com.github.utils4j.gui.imp.ExceptionAlert;
-import com.github.utils4j.gui.imp.SwingTools;
 import com.github.utils4j.imp.Args;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoSlice;
@@ -261,8 +259,9 @@ public class VideoSlicePanel extends AbstractPanel  {
       return;
     Args.requireExists(outputFile, "outputFile does not exists");
     Args.requireNonNull(outputFolder, "outputFolder does not exists");
-    String sliceString = "Corte: de " + slice.startString() + " ate " + slice.endString();
+    final String sliceString = "Corte: de " + slice.startString() + " ate " + slice.endString();
     async = startAsync(sliceString, () -> {
+      
       IProgressView progress = PROGRESS_FACTORY.get();
       try {
         progress.display();
@@ -285,11 +284,12 @@ public class VideoSlicePanel extends AbstractPanel  {
           e -> progress.info(e.getMessage()),
           e -> progress.abort(e)
         );
+        
         if (progress.getAbortCause() != null) {
           throw progress.getAbortCause();
         }
         progress.end();
-        SwingTools.invokeLater(() -> Dialogs.info("Sucesso: " + sliceString));
+        
       } catch (InterruptedException e) {
         ExceptionAlert.show("Operação cancelada!", "Arquivo: " + outputFile.getAbsolutePath(), e);
       } catch (Throwable e) {
