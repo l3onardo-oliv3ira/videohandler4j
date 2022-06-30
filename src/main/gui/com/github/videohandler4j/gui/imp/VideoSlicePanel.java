@@ -49,10 +49,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
-import com.github.progress4j.IProgressView;
-import com.github.progress4j.imp.ProgressFactory;
-import com.github.progress4j.imp.Stage;
 import com.github.utils4j.gui.imp.AbstractPanel;
+import com.github.utils4j.gui.imp.Dialogs;
 import com.github.utils4j.gui.imp.ExceptionAlert;
 import com.github.utils4j.imp.Args;
 import com.github.videohandler4j.IVideoFile;
@@ -252,7 +250,6 @@ public class VideoSlicePanel extends AbstractPanel  {
   }
 
   private volatile Thread async;
-  private static ProgressFactory PROGRESS_FACTORY = new ProgressFactory();
   
   public void splitAndSave(File outputFile, File outputFolder) {
     if (!this.saveButton.isEnabled()) 
@@ -261,15 +258,12 @@ public class VideoSlicePanel extends AbstractPanel  {
     Args.requireNonNull(outputFolder, "outputFolder does not exists");
     final String sliceString = "Corte: de " + slice.startString() + " ate " + slice.endString();
     async = startAsync(sliceString, () -> {
-      
-      IProgressView progress = PROGRESS_FACTORY.get();
       try {
-        progress.display();
-        progress.begin(new Stage(sliceString));
         showProgress("Processando divisão...");
         
         IVideoFile file = FFMPEG.call(outputFile);
         String namePrefix = trim(txtFragName.getText()).replaceAll("[\\\\/:*?\"<>|]", empty());
+        final String name = namePrefix;
         if (!namePrefix.isEmpty())
           namePrefix += '_';
        
@@ -280,25 +274,13 @@ public class VideoSlicePanel extends AbstractPanel  {
             .output(outputFolder.toPath())
             .build()
           )
-        .subscribe(
-          e -> progress.info(e.getMessage()),
-          e -> progress.abort(e)
-        );
-        
-        if (progress.getAbortCause() != null) {
-          throw progress.getAbortCause();
-        }
-        progress.end();
-        
-      } catch (InterruptedException e) {
-        ExceptionAlert.show("Operação cancelada!", "Arquivo: " + outputFile.getAbsolutePath(), e);
+        .subscribe();
+        invokeLater(() ->  Dialogs.message("Sucesso: " + sliceString));        
       } catch (Throwable e) {
         ExceptionAlert.show("Não foi possível dividir o vídeo", "Arquivo: " + outputFile.getAbsolutePath(), e);
       } finally {
         async = null;
         hideProgress();
-        progress.undisplay();
-        progress.dispose();
       }
     });
   }
