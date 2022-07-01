@@ -84,7 +84,7 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
     }finally {
       process.destroyForcibly();
       if (!success) {
-        startAsync(currentOutput::delete, 3000); //delete file after delay
+        startAsync(currentOutput::delete, 1000); //delete file after delay
         if (!Thread.currentThread().isInterrupted()) {
           String outputPath = currentOutput.getCanonicalPath();
           String message = "FFMPEG não processou este vídeo: " + file.getAbsolutePath();
