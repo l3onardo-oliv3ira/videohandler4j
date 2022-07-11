@@ -82,7 +82,7 @@ public enum VideoTools implements Caller<File, IVideoFile, VideoDurationNotFound
       final String durationPrefix = "Duration: ";
       int idx = output.indexOf(durationPrefix);
       if (idx < 0)
-        throw new VideoDurationNotFound();
+        throw new VideoDurationNotFound(output);
       
       final int length = output.length();
       final int start = idx += durationPrefix.length();

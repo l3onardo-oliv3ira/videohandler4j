@@ -32,7 +32,11 @@ public class VideoDurationNotFound extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
   public VideoDurationNotFound() {
-    super("Could not compute video duration");
+    this("");
+  }
+  
+  public VideoDurationNotFound(String message) {
+    super("Could not compute video duration: " + message);
   }
 
   public VideoDurationNotFound(Exception cause) {
