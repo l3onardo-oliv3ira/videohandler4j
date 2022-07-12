@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.temporal.TemporalUnit;
 import java.util.Optional;
 
 import com.github.filehandler4j.imp.FileWrapper;
@@ -112,11 +111,6 @@ public enum VideoTools implements Caller<File, IVideoFile, VideoDurationNotFound
     @Override
     public Duration getDuration() {
       return duration;
-    }
-
-    @Override
-    public long getDuration(TemporalUnit unit) {
-      return duration.get(unit);
     }
   }
 }
