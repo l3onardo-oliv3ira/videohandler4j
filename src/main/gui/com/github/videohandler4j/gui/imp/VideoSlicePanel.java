@@ -50,7 +50,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
 import com.github.utils4j.gui.imp.AbstractPanel;
-import com.github.utils4j.gui.imp.Dialogs;
+import com.github.utils4j.gui.imp.AlertDialog;
 import com.github.utils4j.gui.imp.ExceptionAlert;
 import com.github.utils4j.imp.Args;
 import com.github.videohandler4j.IVideoFile;
@@ -275,7 +275,7 @@ public class VideoSlicePanel extends AbstractPanel  {
             .build()
           )
         .subscribe();
-        invokeLater(() ->  Dialogs.message("Sucesso: " + sliceString));        
+        AlertDialog.info("Sucesso: " + sliceString);        
       } catch (Throwable e) {
         ExceptionAlert.show("Não foi possível dividir o vídeo", "Arquivo: " + outputFile.getAbsolutePath(), e);
       } finally {
