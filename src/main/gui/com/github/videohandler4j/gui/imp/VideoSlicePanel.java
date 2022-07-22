@@ -52,7 +52,6 @@ import javax.swing.border.EtchedBorder;
 import com.github.utils4j.gui.imp.AbstractPanel;
 import com.github.utils4j.gui.imp.AlertDialog;
 import com.github.utils4j.gui.imp.ExceptionAlert;
-import com.github.utils4j.imp.Args;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoSlice;
 import com.github.videohandler4j.imp.BySliceVideoSplitter;
@@ -251,20 +250,17 @@ public class VideoSlicePanel extends AbstractPanel  {
 
   private volatile Thread async;
   
-  public void splitAndSave(File outputFile, File outputFolder) {
-    if (!this.saveButton.isEnabled()) 
+  public void splitAndSave(File inputFile, File outputFolder) {
+    //TODO: we have to go back here! ugly code!
+    if (!this.saveButton.isEnabled() || inputFile == null || !inputFile.exists() || outputFolder == null || !outputFolder.exists()) 
       return;
-    Args.requireExists(outputFile, "outputFile does not exists");
-    Args.requireNonNull(outputFolder, "outputFolder does not exists");
     final String sliceString = "Corte: de " + slice.startString() + " ate " + slice.endString();
     async = startAsync(sliceString, () -> {
       try {
-        showProgress("Processando divisão...");
-        
-        IVideoFile file = FFMPEG.call(outputFile);
+        showProgress("Processando divisão...");        
+        IVideoFile file = FFMPEG.call(inputFile);
         String namePrefix = trim(txtFragName.getText()).replaceAll("[\\\\/:*?\"<>|]", empty());
-        final String name = namePrefix;
-        if (!namePrefix.isEmpty())
+         if (!namePrefix.isEmpty())
           namePrefix += '_';
        
         new BySliceVideoSplitter(false, slice).apply(
@@ -277,7 +273,7 @@ public class VideoSlicePanel extends AbstractPanel  {
         .subscribe();
         AlertDialog.info("Sucesso: " + sliceString);        
       } catch (Throwable e) {
-        ExceptionAlert.show("Não foi possível dividir o vídeo", "Arquivo: " + outputFile.getAbsolutePath(), e);
+        ExceptionAlert.show("Não foi possível dividir o vídeo", "Arquivo: " + inputFile.getAbsolutePath(), e);
       } finally {
         async = null;
         hideProgress();
