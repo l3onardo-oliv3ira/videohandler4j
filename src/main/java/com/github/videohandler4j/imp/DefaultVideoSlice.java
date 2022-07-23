@@ -30,7 +30,7 @@ package com.github.videohandler4j.imp;
 import static com.github.videohandler4j.imp.TimeTools.toHmsString;
 
 import com.github.filehandler4j.imp.DefaultFileSlice;
-import com.github.utils4j.IDurationProvider;
+import com.github.utils4j.IHasDuration;
 import com.github.videohandler4j.IVideoSlice;
 
 public final class DefaultVideoSlice extends DefaultFileSlice implements IVideoSlice {
@@ -58,17 +58,17 @@ public final class DefaultVideoSlice extends DefaultFileSlice implements IVideoS
   }
 
   @Override
-  public long getTime(IDurationProvider file) {
+  public long getTime(IHasDuration file) {
     return end(file) - super.start();
   }
 
   @Override
-  public long end(IDurationProvider file) {
+  public long end(IHasDuration file) {
     return Math.min(super.end(), file.getDuration().toMillis());
   }
   
   @Override
-  public String outputFileName(IDurationProvider file) {
+  public String outputFileName(IHasDuration file) {
     return toHmsString(start()) + "_ate_" + toHmsString(end(file));
   }
 

@@ -31,14 +31,14 @@ import static com.github.videohandler4j.imp.TimeTools.slices;
 
 import java.time.Duration;
 
-import com.github.utils4j.IDurationProvider;
+import com.github.utils4j.IHasDuration;
 import com.github.videohandler4j.IVideoFile;
 
 public class ByDurationVideoSplitter extends AbstractVideoSplitter{
   
   private Duration maxSliceDuration;
   
-  public ByDurationVideoSplitter(IDurationProvider file, Duration maxSliceDuration) {
+  public ByDurationVideoSplitter(IHasDuration file, Duration maxSliceDuration) {
     super(true, slices(file, maxSliceDuration, 0, DEFAULT_PREVIOUS_MARGING));
     this.maxSliceDuration = maxSliceDuration;
   }

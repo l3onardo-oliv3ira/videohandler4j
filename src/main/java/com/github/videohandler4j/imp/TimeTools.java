@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.utils4j.IDurationProvider;
+import com.github.utils4j.IHasDuration;
 import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.Strings;
 import com.github.videohandler4j.IVideoFile;
@@ -136,15 +136,15 @@ public class TimeTools {
     return slices(file, Duration.ofMillis(sliceDurationMillis), sliceStart, previousMarging);
   }
   
-  public static IVideoSlice[] slices(IDurationProvider file, Duration maxDurationSlice) {
+  public static IVideoSlice[] slices(IHasDuration file, Duration maxDurationSlice) {
     return slices(file, maxDurationSlice, 0);
   }
 
-  public static IVideoSlice[] slices(IDurationProvider file, Duration maxDurationSlice, long sliceStart) {
+  public static IVideoSlice[] slices(IHasDuration file, Duration maxDurationSlice, long sliceStart) {
     return slices(file, maxDurationSlice, sliceStart, 0);
   }
   
-  public static IVideoSlice[] slices(IDurationProvider file, Duration maxDurationSlice, long sliceStart, long previousMarging) {
+  public static IVideoSlice[] slices(IHasDuration file, Duration maxDurationSlice, long sliceStart, long previousMarging) {
     Args.requireNonNull(file, "file is null");
     Args.requireNonNull(maxDurationSlice, "maxDurationSlice is null");
     Args.requireZeroPositive(sliceStart, "sliceStart < 0");

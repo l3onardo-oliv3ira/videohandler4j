@@ -28,15 +28,15 @@
 package com.github.videohandler4j;
 
 import com.github.filehandler4j.IFileSlice;
-import com.github.utils4j.IDurationProvider;
+import com.github.utils4j.IHasDuration;
 
 public interface IVideoSlice extends IFileSlice {
 
   long getTime();
 
-  long getTime(IDurationProvider file);
+  long getTime(IHasDuration file);
   
-  long end(IDurationProvider file);
+  long end(IHasDuration file);
   
   String startString();
   
@@ -46,6 +46,6 @@ public interface IVideoSlice extends IFileSlice {
 
   String outputFileName();
   
-  String outputFileName(IDurationProvider file);
+  String outputFileName(IHasDuration file);
 
 }
