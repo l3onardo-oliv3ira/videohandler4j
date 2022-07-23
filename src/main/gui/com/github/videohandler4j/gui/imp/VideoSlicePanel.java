@@ -258,7 +258,7 @@ public class VideoSlicePanel extends AbstractPanel  {
     async = startAsync(sliceString, () -> {
       try {
         showProgress("Processando divisão...");        
-        IVideoFile file = FFMPEG.call(inputFile);
+        IVideoFile file = FFMPEG.create(inputFile);
         String namePrefix = trim(txtFragName.getText()).replaceAll("[\\\\/:*?\"<>|]", empty());
          if (!namePrefix.isEmpty())
           namePrefix += '_';

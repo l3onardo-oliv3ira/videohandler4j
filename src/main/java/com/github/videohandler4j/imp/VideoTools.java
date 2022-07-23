@@ -40,12 +40,12 @@ import com.github.utils4j.IConstants;
 import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.Environment;
 import com.github.utils4j.imp.Streams;
-import com.github.utils4j.imp.function.Caller;
+import com.github.utils4j.imp.function.ICreator;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.imp.exception.FFMpegNotFoundException;
 import com.github.videohandler4j.imp.exception.VideoDurationNotFound;
 
-public enum VideoTools implements Caller<File, IVideoFile, VideoDurationNotFound> {
+public enum VideoTools implements ICreator<File, IVideoFile, VideoDurationNotFound> {
   FFMPEG("ffmpeg.exe");
   
   private final String fileName;
@@ -59,7 +59,7 @@ public enum VideoTools implements Caller<File, IVideoFile, VideoDurationNotFound
   }
   
   @Override
-  public IVideoFile call(File file) throws VideoDurationNotFound {
+  public IVideoFile create(File file) throws VideoDurationNotFound {
     Args.requireNonNull(file, "input is null");
     try {
       Path ffmpeg = fullPath().orElseThrow(FFMpegNotFoundException::new);

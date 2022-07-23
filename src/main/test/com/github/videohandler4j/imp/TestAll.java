@@ -49,7 +49,7 @@ public class TestAll {
     Path baseInput = Paths.get("E:\\jfms\\test-shell\\videos\\audiencia\\");
 
     for(int i = 0; i < outputPath.length; i++) {
-      IVideoFile file = VideoTools.FFMPEG.call(baseInput.resolve("fim.mp4").toFile());
+      IVideoFile file = VideoTools.FFMPEG.create(baseInput.resolve("fim.mp4").toFile());
       VideoDescriptor desc = new VideoDescriptor.Builder(i == 3 ? ".ogg" : (i == 4 ? ".webm" : ".mp4"))
         .add(file)
         .output(baseInput.resolve(outputPath[i]))

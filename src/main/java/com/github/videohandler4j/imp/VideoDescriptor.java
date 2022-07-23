@@ -46,7 +46,7 @@ public class VideoDescriptor extends InputDescriptor {
     
     @Override
     public Builder add(File input) {
-     super.add(VideoTools.FFMPEG.call(input));
+     super.add(VideoTools.FFMPEG.create(input));
       return this;
     }
     
