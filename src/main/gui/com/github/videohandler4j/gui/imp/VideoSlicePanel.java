@@ -25,7 +25,6 @@
 */
 
 
-
 package com.github.videohandler4j.gui.imp;
 
 import static com.github.utils4j.gui.imp.SwingTools.invokeLater;

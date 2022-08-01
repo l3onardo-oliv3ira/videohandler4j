@@ -27,10 +27,11 @@
 
 package com.github.videohandler4j.imp;
 
-import static com.github.videohandler4j.imp.TimeTools.toHmsString;
+import static com.github.utils4j.imp.DurationTools.toHmsString;
 
 import com.github.filehandler4j.imp.DefaultFileSlice;
 import com.github.utils4j.IHasDuration;
+import com.github.utils4j.imp.DurationTools;
 import com.github.videohandler4j.IVideoSlice;
 
 public final class DefaultVideoSlice extends DefaultFileSlice implements IVideoSlice {
@@ -75,17 +76,17 @@ public final class DefaultVideoSlice extends DefaultFileSlice implements IVideoS
   @Override
   public String endString() {
     long end = super.end();
-    return Long.MAX_VALUE == end ? "__:__:__" : TimeTools.toString(end);
+    return Long.MAX_VALUE == end ? "__:__:__" : DurationTools.toString(end);
   }
 
   @Override
   public String startString() {
-    return TimeTools.toString(start());
+    return DurationTools.toString(start());
   }
 
   @Override
   public String timeString() {
     long end = super.end();
-    return end == Long.MAX_VALUE ? "__:__:__" : TimeTools.toString(getTime());
+    return end == Long.MAX_VALUE ? "__:__:__" : DurationTools.toString(getTime());
   }
 }

@@ -27,8 +27,6 @@
 
 package com.github.videohandler4j.imp;
 
-import static com.github.videohandler4j.imp.TimeTools.parse;
-
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -38,6 +36,7 @@ import java.util.Optional;
 import com.github.filehandler4j.imp.FileWrapper;
 import com.github.utils4j.IConstants;
 import com.github.utils4j.imp.Args;
+import com.github.utils4j.imp.DurationTools;
 import com.github.utils4j.imp.Environment;
 import com.github.utils4j.imp.Streams;
 import com.github.utils4j.imp.function.ICreator;
@@ -90,7 +89,7 @@ public enum VideoTools implements ICreator<File, IVideoFile, VideoDurationNotFou
         idx++;
 
       String durationText = output.substring(start, idx);
-      Duration duration = parse(durationText).orElseThrow(VideoDurationNotFound::new);
+      Duration duration = DurationTools.parse(durationText).orElseThrow(VideoDurationNotFound::new);
       return new VideoFile(file, duration);
     } catch (VideoDurationNotFound e) {
       throw e;

@@ -47,6 +47,7 @@ import com.github.utils4j.IConstants;
 import com.github.utils4j.IResetableIterator;
 import com.github.utils4j.imp.ArrayIterator;
 import com.github.utils4j.imp.Containers;
+import com.github.utils4j.imp.DurationTools;
 import com.github.utils4j.imp.States;
 import com.github.utils4j.imp.Strings;
 import com.github.utils4j.imp.Threads;
@@ -156,7 +157,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           Long.toString(max(getRuntime().availableProcessors() - 1, 1)),
           "-hide_banner",
           "-ss",
-          TimeTools.toString(start) + ".000",          
+          DurationTools.toString(start) + ".000",          
           "-i",
           file.getAbsolutePath(),
           "-max_muxing_queue_size",
