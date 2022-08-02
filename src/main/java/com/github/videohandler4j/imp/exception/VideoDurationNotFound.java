@@ -27,7 +27,7 @@
 
 package com.github.videohandler4j.imp.exception;
 
-public class VideoDurationNotFound extends RuntimeException {
+public class VideoDurationNotFound extends Exception {
 
   private static final long serialVersionUID = 1L;
 

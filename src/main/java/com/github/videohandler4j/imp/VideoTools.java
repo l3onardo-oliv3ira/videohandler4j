@@ -27,6 +27,8 @@
 
 package com.github.videohandler4j.imp;
 
+import static com.github.utils4j.imp.Throwables.runQuietly;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -39,12 +41,11 @@ import com.github.utils4j.imp.Args;
 import com.github.utils4j.imp.DurationTools;
 import com.github.utils4j.imp.Environment;
 import com.github.utils4j.imp.Streams;
-import com.github.utils4j.imp.function.ICreator;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.imp.exception.FFMpegNotFoundException;
 import com.github.videohandler4j.imp.exception.VideoDurationNotFound;
 
-public enum VideoTools implements ICreator<File, IVideoFile, VideoDurationNotFound> {
+public enum VideoTools {
   FFMPEG("ffmpeg.exe");
   
   private final String fileName;
@@ -57,8 +58,7 @@ public enum VideoTools implements ICreator<File, IVideoFile, VideoDurationNotFou
     return Environment.resolveTo("FFMPEG_HOME", fileName, true, true);
   }
   
-  @Override
-  public IVideoFile create(File file) throws VideoDurationNotFound {
+  public IVideoFile create(File file) throws VideoDurationNotFound, InterruptedException {
     Args.requireNonNull(file, "input is null");
     try {
       Path ffmpeg = fullPath().orElseThrow(FFMpegNotFoundException::new);
@@ -74,7 +74,7 @@ public enum VideoTools implements ICreator<File, IVideoFile, VideoDurationNotFou
         output = Streams.readOutStream(input, IConstants.CP_850).get();
         process.waitFor();
       } finally {
-        process.destroyForcibly();
+        runQuietly(process.destroyForcibly()::waitFor);
       }
       
       final String durationPrefix = "Duration: ";
@@ -91,6 +91,8 @@ public enum VideoTools implements ICreator<File, IVideoFile, VideoDurationNotFou
       String durationText = output.substring(start, idx);
       Duration duration = DurationTools.parse(durationText).orElseThrow(VideoDurationNotFound::new);
       return new VideoFile(file, duration);
+    } catch (InterruptedException e) {
+      throw e;
     } catch (VideoDurationNotFound e) {
       throw e;
     } catch (Exception e) {

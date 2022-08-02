@@ -28,6 +28,7 @@
 package com.github.videohandler4j.imp;
 
 import static com.github.utils4j.imp.Threads.startAsync;
+import static com.github.utils4j.imp.Throwables.runQuietly;
 import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
 
 import java.io.BufferedReader;
@@ -95,7 +96,7 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
           emitter.onNext(new VideoOutputEvent("Generated file " + outputVideo, outputVideo, file.length()));
         }
       }catch(InterruptedException e) {
-        process.destroyForcibly().waitFor();
+        runQuietly(process.destroyForcibly()::waitFor);
         if (!success) {
           interruptAndWait(reader);
           current.interrupt();

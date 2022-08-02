@@ -27,6 +27,8 @@
 
 package com.github.videohandler4j.imp;
 
+import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -49,7 +51,7 @@ public class TestAll {
     Path baseInput = Paths.get("E:\\jfms\\test-shell\\videos\\audiencia\\");
 
     for(int i = 0; i < outputPath.length; i++) {
-      IVideoFile file = VideoTools.FFMPEG.create(baseInput.resolve("fim.mp4").toFile());
+      IVideoFile file = FFMPEG.create(baseInput.resolve("fim.mp4").toFile());
       VideoDescriptor desc = new VideoDescriptor.Builder(i == 3 ? ".ogg" : (i == 4 ? ".webm" : ".mp4"))
         .add(file)
         .output(baseInput.resolve(outputPath[i]))

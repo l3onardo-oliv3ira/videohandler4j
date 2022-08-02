@@ -27,7 +27,6 @@
 
 package com.github.videohandler4j.imp;
 
-import java.io.File;
 import java.io.IOException;
 
 import com.github.filehandler4j.imp.InputDescriptor;
@@ -42,12 +41,6 @@ public class VideoDescriptor extends InputDescriptor {
     
     public Builder(String extension) {
       super(extension);
-    }
-    
-    @Override
-    public Builder add(File input) {
-     super.add(VideoTools.FFMPEG.create(input));
-      return this;
     }
     
     public Builder add(IVideoFile input) {
