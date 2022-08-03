@@ -27,6 +27,7 @@
 
 package com.github.videohandler4j.imp;
 
+import static com.github.utils4j.imp.Throwables.runQuietly;
 import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
 import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
@@ -205,7 +206,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
             reader = null;
           }
         }finally {
-          process.destroyForcibly();
+          runQuietly(process.destroyForcibly()::wait);
           if (success) {
             sliceId++;
             emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));            

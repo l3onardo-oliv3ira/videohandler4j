@@ -36,8 +36,11 @@ import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoSlice;
 
 public class BySizeVideoSplitter extends AbstractVideoSplitter{
+  
   private final long maxSliceFileSize;
+  
   private final IVideoFile file;
+  
   private float percent = 0.95f; //5 percent discount
   
   public BySizeVideoSplitter(IVideoFile file, long maxSliceFileSize) {

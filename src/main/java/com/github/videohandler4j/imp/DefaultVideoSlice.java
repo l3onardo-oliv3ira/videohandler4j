@@ -55,7 +55,7 @@ public final class DefaultVideoSlice extends DefaultFileSlice implements IVideoS
   
   @Override
   public String outputFileName() {
-    return toHmsString(start()) + "_ate_" + toHmsString(end());
+    return toHmsString(start()) + "_até_" + toHmsString(end());
   }
 
   @Override
