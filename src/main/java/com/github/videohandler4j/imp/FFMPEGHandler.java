@@ -27,7 +27,7 @@
 
 package com.github.videohandler4j.imp;
 
-import static com.github.utils4j.imp.Threads.startAsync;
+import static com.github.utils4j.imp.Threads.startDaemon;
 import static com.github.utils4j.imp.Throwables.runQuietly;
 import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
 
@@ -77,7 +77,7 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
     boolean success = false;
 
     try(InputStream input = process.getInputStream()) {
-      Thread reader = startAsync("ffmpeg output reader", () -> {
+      Thread reader = startDaemon("ffmpeg output reader", () -> {
         Thread io = Thread.currentThread();
         try {
           BufferedReader br = new BufferedReader(new InputStreamReader(input, IConstants.CP_850));
