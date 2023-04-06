@@ -27,6 +27,7 @@
 
 package com.github.videohandler4j.imp;
 
+import static com.github.utils4j.imp.Directory.stringPath;
 import static com.github.utils4j.imp.Threads.startDaemon;
 import static com.github.utils4j.imp.Throwables.runQuietly;
 import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
@@ -40,6 +41,7 @@ import java.util.List;
 import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileHandler;
 import com.github.utils4j.IConstants;
+import com.github.utils4j.gui.imp.ThrowableTracker;
 import com.github.utils4j.imp.Containers;
 import com.github.videohandler4j.IVideoInfoEvent;
 import com.github.videohandler4j.imp.event.VideoInfoEvent;
@@ -53,12 +55,12 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
   @Override
   protected final void handle(IInputFile file, Emitter<IVideoInfoEvent> emitter) throws Exception {
     
-    File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
-    File outputVideo = resolveOutput(file.getShortName() + ".mp4");
+    final File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
+    final File outputVideo = resolveOutput(file.getShortName() + ".mp4");
     outputVideo.delete();
 
     List<String> commandLine = Containers.arrayList(
-      ffmpegHome.getCanonicalPath(),
+      stringPath(ffmpegHome),
       "-y",
       "-i",
       file.getAbsolutePath(),
@@ -67,13 +69,15 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
       "-hide_banner",
       "-nostdin"
     );
-    fillParameters(commandLine);    
-    commandLine.add(outputVideo.getCanonicalPath());
+    fillParameters(commandLine);
+    final String outputPath = stringPath(outputVideo);
+    
+    commandLine.add(outputPath);
     
     final Thread current = Thread.currentThread();
     final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
         
-    emitter.onNext(new VideoInfoEvent("Processing file: " + file.getName() + " output: " + outputVideo.getAbsolutePath()));
+    emitter.onNext(new VideoInfoEvent("Processing file: " + file.getName() + " output: " + outputPath));
     boolean success = false;
 
     try(InputStream input = process.getInputStream()) {
@@ -93,7 +97,7 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
         success = process.waitFor() == 0;
         interruptAndWait(reader);
         if (success) {
-          emitter.onNext(new VideoOutputEvent("Generated file " + outputVideo, outputVideo, file.length()));
+          emitter.onNext(new VideoOutputEvent("Generated file " + outputPath, outputVideo, file.length()));
         }
       }catch(InterruptedException e) {
         runQuietly(process.destroyForcibly()::waitFor);
@@ -102,19 +106,19 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
           current.interrupt();
           throw e;
         }
+      }finally {
+        reader = null;
       }
     }finally {
       if (!success) {
         outputVideo.delete();
         if (!current.isInterrupted()) {
-          String message = "FFMPEG não processou este vídeo: " + file.getAbsolutePath();
-          String outputPath = outputVideo.getCanonicalPath();
-          if (outputPath.length() >= 255) {
-            message = "\nO caminho dos arquivos ultrapassa 256 caracteres. Tente diminuir o "
-                + "comprimento do nome do arquivo ou a hierarquia de pastas";
-          }
-          emitter.onNext(new VideoInfoEvent(message));
-          throw new Exception(message);
+          String message = "FFMPEG não processou este vídeo: " + file.getAbsolutePath() + "\n";
+          String explainMessage = outputPath.length() >= 255 ? 
+              "O caminho dos arquivos ultrapassa 256 caracteres. Tente diminuir o comprimento do nome do arquivo ou a hierarquia de pastas!" : 
+              "Aparentemente o arquivo de vídeo não tem o formato aceito Mp4!";
+          emitter.onNext(new VideoInfoEvent(message + explainMessage));
+          throw new Exception(message + ThrowableTracker.DEFAULT.mark(explainMessage));
         }
       }
     }

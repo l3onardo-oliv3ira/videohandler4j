@@ -27,6 +27,8 @@
 
 package com.github.videohandler4j.imp;
 
+import static com.github.utils4j.gui.imp.ThrowableTracker.DEFAULT;
+import static com.github.utils4j.imp.Directory.stringPath;
 import static com.github.utils4j.imp.Throwables.runQuietly;
 import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
 import static java.lang.Math.max;
@@ -151,7 +153,7 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         Duration duration = Duration.ofMillis(next.end(file) - start);
 
         List<String> commandLine = Containers.arrayList(
-          ffmpegHome.getCanonicalPath(),
+          stringPath(ffmpegHome),
           "-y",
           "-nostdin",
           "-threads",
@@ -170,13 +172,13 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         commandLine.add("-t");
         commandLine.add(Long.toString(duration.getSeconds()));
 
-        final String outputPath = currentOutput.getCanonicalPath();
+        final String outputPath = stringPath(currentOutput);
         
         commandLine.add(outputPath);
 
         final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
         
-        emitter.onNext(new VideoInfoEvent("Processing file: " + file.getName() + " output: " + currentOutput.getAbsolutePath()));
+        emitter.onNext(new VideoInfoEvent("Processing file: " + file.getName() + " output: " + outputPath));
         
         boolean success = false;
         boolean splitSuccess = false;
@@ -209,16 +211,16 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
           runQuietly(process.destroyForcibly()::wait);
           if (success) {
             sliceId++;
-            emitter.onNext(new VideoOutputEvent("Generated file " + currentOutput, currentOutput, next.getTime(file)));            
+            emitter.onNext(new VideoOutputEvent("Generated file " + outputPath, currentOutput, next.getTime(file)));            
           } else {
             currentOutput.delete();
             if (!splitSuccess) {
-              String message = "FFMPEG não pôde dividir este vídeo: " + f.getAbsolutePath();
-              if (outputPath.length() >= 255)
-                message = "\nO caminho dos arquivos ultrapassa 256 caracteres. Tente diminuir o comprimento do nome do "
-                    + "arquivo ou a hierarquia de pastas";
-              emitter.onNext(new VideoInfoEvent(message));
-              throw new Exception(message);
+              String message = "FFMPEG não pôde dividir este vídeo: " + f.getAbsolutePath() + "\n";
+              String explainMessage = outputPath.length() >= 255 ? 
+                  "O caminho dos arquivos ultrapassa 256 caracteres. Tente diminuir o comprimento do nome do arquivo ou da hierarquia de pastas!" :
+                  "Aparentemente o arquivo de vídeo não tem o formato aceito Mp4!";
+              emitter.onNext(new VideoInfoEvent(message + explainMessage));
+              throw new Exception(message + DEFAULT.mark(explainMessage));
             }
           }
         }

@@ -60,7 +60,8 @@ public class BySizeVideoSplitter extends AbstractVideoSplitter{
   
   @Override
   protected boolean accept(File sliceFile, IVideoSlice slice) {
-    if (sliceFile.length() <= maxSliceFileSize) {
+    //Uma tolerância de 5 segundos de vídeo
+    if (percent <= 0.05 || slice.getTime() <= 5000 ||  sliceFile.length() <= maxSliceFileSize) {
       return true;
     }
     long smallerSize = (long)(percent * maxSliceFileSize);
