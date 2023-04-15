@@ -28,24 +28,15 @@
 package com.github.videohandler4j.imp;
 
 import static com.github.utils4j.imp.Directory.stringPath;
-import static com.github.utils4j.imp.Threads.startDaemon;
-import static com.github.utils4j.imp.Throwables.runQuietly;
 import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileHandler;
-import com.github.utils4j.IConstants;
-import com.github.utils4j.gui.imp.ThrowableTracker;
 import com.github.utils4j.imp.Containers;
 import com.github.videohandler4j.IVideoInfoEvent;
-import com.github.videohandler4j.imp.event.VideoInfoEvent;
-import com.github.videohandler4j.imp.event.VideoOutputEvent;
 import com.github.videohandler4j.imp.exception.FFMpegNotFoundException;
 
 import io.reactivex.Emitter;
@@ -70,58 +61,8 @@ public abstract class FFMPEGHandler extends AbstractFileHandler<IVideoInfoEvent>
       "-nostdin"
     );
     fillParameters(commandLine);
-    final String outputPath = stringPath(outputVideo);
     
-    commandLine.add(outputPath);
-    
-    final Thread current = Thread.currentThread();
-    final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
-        
-    emitter.onNext(new VideoInfoEvent("Processing file: " + file.getName() + " output: " + outputPath));
-    boolean success = false;
-
-    try(InputStream input = process.getInputStream()) {
-      Thread reader = startDaemon("ffmpeg output reader", () -> {
-        Thread io = Thread.currentThread();
-        try {
-          BufferedReader br = new BufferedReader(new InputStreamReader(input, IConstants.CP_850));
-          String inputLine;
-          while (!io.isInterrupted() && (inputLine = br.readLine()) != null) {
-            emitter.onNext(new VideoInfoEvent(inputLine));
-          }
-        } catch (Exception e) {
-          emitter.onNext(new VideoInfoEvent("Fail in thread: " + io.getName() + ": " + e.getMessage()));
-        }
-      });
-      try {
-        success = process.waitFor() == 0;
-        interruptAndWait(reader);
-        if (success) {
-          emitter.onNext(new VideoOutputEvent("Generated file " + outputPath, outputVideo, file.length()));
-        }
-      }catch(InterruptedException e) {
-        runQuietly(process.destroyForcibly()::waitFor);
-        if (!success) {
-          interruptAndWait(reader);
-          current.interrupt();
-          throw e;
-        }
-      }finally {
-        reader = null;
-      }
-    }finally {
-      if (!success) {
-        outputVideo.delete();
-        if (!current.isInterrupted()) {
-          String message = "FFMPEG não processou este vídeo: " + file.getAbsolutePath() + "\n";
-          String explainMessage = outputPath.length() >= 255 ? 
-              "O caminho dos arquivos ultrapassa 256 caracteres. Tente diminuir o comprimento do nome do arquivo ou a hierarquia de pastas!" : 
-              "Aparentemente o arquivo de vídeo não tem o formato aceito Mp4!";
-          emitter.onNext(new VideoInfoEvent(message + explainMessage));
-          throw new Exception(message + ThrowableTracker.DEFAULT.mark(explainMessage));
-        }
-      }
-    }
+    new FFMPEGProcessor(commandLine, outputVideo).proccess(file, emitter);
   }
   
   protected abstract void fillParameters(List<String> parameters);

@@ -27,18 +27,13 @@
 
 package com.github.videohandler4j.imp;
 
-import static com.github.utils4j.gui.imp.ThrowableTracker.DEFAULT;
 import static com.github.utils4j.imp.Directory.stringPath;
-import static com.github.utils4j.imp.Throwables.runQuietly;
 import static com.github.videohandler4j.imp.VideoTools.FFMPEG;
 import static java.lang.Math.max;
 import static java.lang.Runtime.getRuntime;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -46,18 +41,15 @@ import java.util.List;
 
 import com.github.filehandler4j.IInputFile;
 import com.github.filehandler4j.imp.AbstractFileRageHandler;
-import com.github.utils4j.IConstants;
 import com.github.utils4j.ISmartIterator;
 import com.github.utils4j.imp.ArrayIterator;
 import com.github.utils4j.imp.Containers;
 import com.github.utils4j.imp.DurationTools;
 import com.github.utils4j.imp.States;
 import com.github.utils4j.imp.Strings;
-import com.github.utils4j.imp.Threads;
 import com.github.videohandler4j.IVideoFile;
 import com.github.videohandler4j.IVideoInfoEvent;
 import com.github.videohandler4j.IVideoSlice;
-import com.github.videohandler4j.imp.event.VideoInfoEvent;
 import com.github.videohandler4j.imp.event.VideoOutputEvent;
 import com.github.videohandler4j.imp.exception.FFMpegNotFoundException;
 
@@ -137,7 +129,6 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
     
     IVideoSlice next = nextSlice();
     
-    
     if (next != null) {
       File ffmpegHome = FFMPEG.fullPath().orElseThrow(FFMpegNotFoundException::new).toFile();
 
@@ -172,58 +163,16 @@ abstract class AbstractVideoSplitter extends AbstractFileRageHandler<IVideoInfoE
         commandLine.add("-t");
         commandLine.add(Long.toString(duration.getSeconds()));
 
-        final String outputPath = stringPath(currentOutput);
+        final IVideoSlice slice = next;
         
-        commandLine.add(outputPath);
-
-        final Process process = new ProcessBuilder(commandLine).redirectErrorStream(true).start();
+        final FFMPEGProcessor processor = new FFMPEGProcessor(commandLine, currentOutput, (o) -> accept(o, slice));
         
-        emitter.onNext(new VideoInfoEvent("Processing file: " + file.getName() + " output: " + outputPath));
-        
-        boolean success = false;
-        boolean splitSuccess = false;
-
-        try(InputStream input = process.getInputStream()) {
-          Thread reader = Threads.startAsync("ffmpeg output reader", () -> {
-            Thread currentThread = Thread.currentThread();
-            try {
-              BufferedReader br = new BufferedReader(new InputStreamReader(input, IConstants.CP_850));
-              String inputLine;
-              while (!currentThread.isInterrupted() && (inputLine = br.readLine()) != null) {
-                emitter.onNext(new VideoInfoEvent(Strings.replace(inputLine, '%', '#')));
-              }
-            } catch (Exception e) {
-              emitter.onNext(new VideoInfoEvent("Fail in thread: " + currentThread.getName() + ": " + e.getMessage()));
-            }
-          });
-          try {
-            splitSuccess = process.waitFor() == 0;
-            success = splitSuccess && accept(currentOutput, next);
-            interruptAndWait(reader);
-          }catch(InterruptedException e) {
-            interruptAndWait(reader);
-            Thread.currentThread().interrupt();
-            throw e;
-          }finally {
-            reader = null;
-          }
-        }finally {
-          runQuietly(process.destroyForcibly()::wait);
-          if (success) {
-            sliceId++;
-            emitter.onNext(new VideoOutputEvent("Generated file " + outputPath, currentOutput, next.getTime(file)));            
-          } else {
-            currentOutput.delete();
-            if (!splitSuccess) {
-              String message = "FFMPEG não pôde dividir este vídeo: " + f.getAbsolutePath() + "\n";
-              String explainMessage = outputPath.length() >= 255 ? 
-                  "O caminho dos arquivos ultrapassa 256 caracteres. Tente diminuir o comprimento do nome do arquivo ou da hierarquia de pastas!" :
-                  "Aparentemente o arquivo de vídeo não tem o formato aceito Mp4!";
-              emitter.onNext(new VideoInfoEvent(message + explainMessage));
-              throw new Exception(message + DEFAULT.mark(explainMessage));
-            }
-          }
+        if (processor.proccess(file, emitter)) {
+          sliceId++;
+        } else {
+          checkInterrupted();
         }
+
       }while((next = nextSlice()) != null);
     }      
   }
